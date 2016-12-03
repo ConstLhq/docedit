@@ -1,0 +1,23 @@
+doctype html
+html#ng-app(ng-app='myApp')
+  head
+    include ../includes/head
+  body
+    include ../includes/ng-template
+    div(ng-controller="index")
+      div(index-nav)
+      .header-section
+        .header.container
+          h2 文档信息抽取，收集价值地理信息
+          p 支持时间、空间、属性信息提取，支持自定义规则，发现文档价值信息
+          p 文档上传+解析+编辑+数据导出
+          .navs.clearfix
+            -if(user)
+              a.btn.btn-primary(href='/edit') 个人中心
+            -else
+              a.btn.btn-primary(href='#' data-toggle="modal", data-target="#signupModal") 注册 
+            span.btn.btn-default.split
+            a.btn.btn-default.app-download(href='/about') 登陆
+            span.btn.btn-default.split
+            a.btn.btn-default.app-download(href='/about') 了解更多
+            img.mac-ipad-iphone(src='/img/mac.png')

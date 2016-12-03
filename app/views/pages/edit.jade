@@ -1,0 +1,14 @@
+doctype html
+html#ng-app(ng-app='myApp')
+  head
+    include ../includes/head
+  body
+    include ../includes/ng-template
+    div(ng-controller="edit")
+      div(edit-nav)
+      //-文档视图
+      div(ng-show="state.showdocview")
+        div(doc-panels)
+      //-地图视图
+      dvi(ng-if="!state.showdocview")
+        div(map-view)

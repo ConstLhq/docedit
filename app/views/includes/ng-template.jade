@@ -1,0 +1,313 @@
+script(type="text/ng-template" id="indexnav.html")
+  nav#headerContainer.navbar.navbar-default.navbar-fixed-top(role='navigation')
+        .container.container-fluid
+          .navbar-header
+            button.navbar-toggle.collapsed(type='button', data-toggle='collapse', data-target='#navbar', aria-expanded='false', aria-controls='navbar')
+              span.sr-only Toggle navigation
+              span.icon-bar
+              span.icon-bar
+              span.icon-bar
+            a.navbar-brand(href='/', title='首页')       
+              img(src='/img/logo.png')
+          #navbarUser
+            -if (user)
+              .dropdown(role='presentation')
+                a.dropdown-toggle(data-toggle='dropdown', href='#')
+                  span.my-username 欢迎您,#{user.name}
+                  span.fa.fa-caret-down
+                ul.dropdown-menu(role='menu')
+                  li
+                    a(href='/user/#{user._id}') 个人中心
+                  li
+                    a(href='/logout') 退出
+            -else
+              .dropdown(role='presentation')
+                a.dropdown-toggle(data-toggle='dropdown', href='#')
+                  span.my-username 登陆
+                  span.fa.fa-caret-down
+                ul.dropdown-menu(role='menu')
+                  li
+                    a.navbar-link(href="#", data-toggle="modal", data-target="#signupModal") 注册
+                  li
+                    a.navbar-link(href="#", data-toggle="modal", data-target="#signinModal") 登录
+          #navbar.navbar-collapse.collapse
+            ul.nav.navbar-nav.navbar-right
+              li.active
+                a(href='/') 首页
+              li
+                a(href='https://pro.leanote.com') 信息提取
+              li
+                a#leanoteApp(href='http://app.leanote.com') 地图视图
+              li
+                a(href='http://lea.leanote.com') 关于
+    #signupModal.modal.fade
+      .modal-dialog
+        .modal-content
+          form(method="POST", action="/user/signup")
+            .modal-header(style="color:rgb(57,57,57)") 注册
+            .modal-body
+              .form-group
+                label(for="signupName",style="color:rgb(57,57,57)") 用户名
+                input#signupName.form-control(name="name", type="text" ,placeholder="数字字母下划线组合",pattern="[a-zA-Z0-9_\.]+",required,maxlength="15")
+              .form-group
+                label(for="signupPassword",style="color:rgb(57,57,57)") 密码
+                input#signupPassword.form-control(name="password", type="password",maxlength="15")
+            .modal-footer
+              button.btn.btn-default(type="button", data-dismiss="modal") 关闭
+              button.btn.btn-success(type="submit") 注册
+    #signinModal.modal.fade
+      .modal-dialog
+        .modal-content
+          form(method="POST", action="/user/signin")
+            .modal-header(style="color:rgb(57,57,57)") 登录
+            .modal-body
+              .form-group
+                label(for="signinName",style="color:rgb(57,57,57)") 用户名
+                input#signinName.form-control(name="name", type="text",placeholder="请输入用户名",pattern="[a-zA-Z0-9_\.]+",required,maxlength="15")
+              .form-group
+                label(for="signinPassword",style="color:rgb(57,57,57)") 密码
+                input#signinPassword.form-control(name="password", type="password")
+            .modal-footer
+              button.btn.btn-default(type="button", data-dismiss="modal") 关闭
+              button.btn.btn-success(type="submit") 登录
+//-
+script(type="text/ng-template" id="editnav.html")
+  nav.navbar.navbar-default(role='navigation')
+    .container-fluid
+      .navbar-header
+        button.navbar-toggle.collapsed(type='button', data-toggle='collapse', data-target='#bs-example-navbar-collapse-1')
+          span.sr-only Toggle navigation
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.navbar-brand(href='/', title='首页')       
+          img(src='/img/logo.png' width="32px" height = "32px")
+        h3.navbar-text(ng-hide="state.isContentCollapsed") 文档信息抽取
+        a.navbar-brand(href="#")
+          i(ng-click="collapseContent()" ng-class="{'fa fa-outdent':!state.isContentCollapsed,'fa fa-indent':state.isContentCollapsed}" title="目录")
+      .collapse.navbar-collapse
+        form.navbar-form.navbar-left(role='search')
+          .form-group
+            input.form-control(type='text', placeholder='Search')
+            button.btn.btn-default(type='submit') 
+              i.fa.fa-search
+              | 搜文档
+        -if (user)
+         p.navbar-text.navbar-right
+          span 欢迎您,#{user.name}
+          span &nbsp;|&nbsp;
+          a.navbar-link(href="/logout") 登出
+        ul.nav.navbar-nav
+          li
+            button.btn.btn-default.navbar-btn(type="button" ng-click="uploadToggle()")
+              i.fa.fa-upload
+              | 上传文档
+          li
+            button.btn.btn-default.navbar-btn(type="button" ng-click="changeView()") {{state.nextview}}
+script(type="text/ng-template" id="docview.html")
+  .parent
+    #content.split.split-horizontal
+      .toolbar(style="border-style:groove")
+        a(href="#" ng-click="showAddGroupInput()" title="新建分组")
+          span.fa.fa-plus
+        span &nbsp;
+        a(href="#" ng-click="collapseContent()" title="隐藏目录")
+          span.fa.fa-outdent
+      form.form-horizontal(role='form',name="newgroupform" ng-show="state.showAddGroupInput")
+        .form-group.form-group-sm
+          .col-sm-8.col-sm-offset-1
+            input.form-control.input-sm#newgroupinput(placeholder="输入新建分组名" type="text" ng-model="state.newGroupName")
+          .col-sm-3
+            a.btn.btn-default.btn-xs.btn-warning(role="button" ng-click="hideAddGroupInput()")
+              span.fa.fa-times
+            a.btn.btn-default.btn-xs.btn.btn-success(role="button" ng-click="submitAddnewGroup()")
+              span.fa.fa-check
+      abn-tree(conte-menu="state.leftmenuOptions" tree-data = "state.my_treedata" tree-control= "my_tree" icon-leaf="fa fa-file-text-o" icon-expand="fa fa-chevron-right" icon-collapse="fa fa-chevron-down"  expand-level="2" on-select="my_tree_handler(branch)" ng-init="state.my_treedata="+userTreeData) 
+    #doc.split.split-horizontal
+      #docContent(ng-scrollbars ng-scrollbars-config="state.scrollbarconfig" context-menu="state.middlemenuOptions")
+        h3 尚未选择文档
+    #result.split.split-horizontal
+      .toolbar(style="border-style:groove" ng-show="state.selectedDocId!=undefined")
+        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()" )
+          span.fa.fa-filter
+            |筛选 
+        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()")
+          span.fa.fa-database
+            |保存
+        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()")
+          span.fa.fa-save
+            |导出
+        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()")
+          span.fa.fa-check-square-o
+            |全选
+        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()")
+          span.fa.fa-globe
+            |地图
+        a.btn.btn-xs.btn-default(href="#" ng-click="collapseEdit()" title="隐藏编辑视图" style="right:8px;position:absolute")
+          span.fa.fa-indent
+      ul.list-group(ng-scrollbars ng-scrollbars-config="state.scrollbarconfig")
+        li.list-group-item(ng-repeat="result in state.results")
+         h4.text-primary 时间：{{result.TIME[0]}}
+         h4.text-warning 位置：{{result.GEO[0]}}
+         div
+           h4(style = "float:left") 内容：
+           h4(style = "padding-left:40px") {{result.CONTENT[0]}}
+      //-添加筛选工具的panel
+      div(pageslide ps-open="state.filterChecked"  ps-click-outside="true" ps-container="result" ps-side="top"  ps-size ="120px" ps-push="false")
+        div(filter-form)
+      //-隐藏编辑内容后的工具条
+      div(pageslide ps-open="state.isEditCollapsed"  ps-click-outside="false" ps-container="doc" ps-side="right"  ps-size ="20px" ps-push="true")
+        a(href="#" ng-click="collapseEdit()" title="显示编辑视图")
+          span.fa.fa-outdent
+  div(pageslide ps-open="state.uploadChecked"  ps-container="doc"  ps-click-outside ="false" ps-side="top"  ps-size ="600px" ps-push="false" )
+    div.container
+      #fileupload(nv-file-drop='', uploader='uploader', filters='queueLimit, customFilter')
+        .row-fluid
+          .col-sm-9
+            div(ng-show='uploader.isHTML5') 
+              .well.my-drop-zone(nv-file-over='', uploader='uploader')
+                input(type='file', nv-file-select='', uploader='uploader')
+                h4.text-center 拖放文件到此处
+        .row-fluid
+          .col-sm-9(style='margin-bottom: 40px')
+                    table.table
+                      thead
+                        tr
+                          th(width='40%') 文件              
+                          th(ng-show='uploader.isHTML5') 大小
+                          th 状态                                 
+                          th 操作
+                      tbody
+                        tr(ng-repeat='item in uploader.queue')
+                          td
+                            strong {{ item.file.name }}
+                          td(ng-show='uploader.isHTML5', nowrap='') {{ item.file.size/1024/1024|number:2 }} MB
+                          td.text-center
+                            span(ng-show='item.isSuccess')
+                              i.glyphicon.glyphicon-ok
+                            span(ng-show='item.isCancel')
+                              i.glyphicon.glyphicon-ban-circle
+                            span(ng-show='item.isError')
+                              i.glyphicon.glyphicon-remove
+                          td(nowrap='')
+                            button.btn.btn-success.btn-xs(title='上传' type='button', ng-click='item.upload()', ng-disabled='item.isReady || item.isUploading || item.isSuccess')
+                              span.glyphicon.glyphicon-upload
+                            button.btn.btn-warning.btn-xs(title='取消' type='button', ng-click='item.cancel()', ng-disabled='!item.isUploading')
+                              span.glyphicon.glyphicon-ban-circle
+                            button.btn.btn-danger.btn-xs(title='删除' type='button', ng-click='item.remove()')
+                              span.glyphicon.glyphicon-trash
+                    div
+                      div 上传进度:
+                        .progress(style='')
+                          .progress-bar(role='progressbar', ng-style="{ 'width': uploader.progress + '%' }")
+                      .form-group
+                        label(for="filetype" ) 选择分组
+                        select(class="form-control" ng-model="uploader.queue[0].formData[0].docGroup" ng-disabled="uploader.queue.length==0" ng-options= "group for group in state.docGroup")
+                      .form-group
+                        label(for="timesequence" class="col-sm-2") 时间序列
+                        input(type="checkbox"  class = "form-inline" ng-init="uploader.queue[0].formData.push({sequence:false})" ng-model="uploader.queue[0].formData[0].sequence" ng-disabled="uploader.queue.length==0")
+                      button.btn.btn-success.btn-s(type='button', ng-click='uploader.uploadAll()', ng-disabled='!uploader.getNotUploadedItems().length ||uploader.queue[0].formData[0].filetype=="none"')
+                        span.glyphicon.glyphicon-upload
+                        |  上传
+                      button.btn.btn-warning.btn-s(type='button', ng-click='uploader.cancelAll()', ng-disabled='!uploader.isUploading')
+                        span.glyphicon.glyphicon-ban-circle
+                        |  取消
+                      button.btn.btn-danger.btn-s(type='button', ng-click='uploader.clearQueue()', ng-disabled='!uploader.queue.length')
+                        span.glyphicon.glyphicon-trash
+                        |  删除  
+        .row-fluid
+          .col-md-1.col-md-offset-8
+            btn.btn.btn-danger(ng-click="uploadToggle()") 收起
+
+script(type="text/ng-template" id="filter.html")
+  h6.text-center 添加抽取条件
+  form.form-horizontal(role='form')
+    #root.form-group 
+      .col-sm-9.col-sm-offset-1  
+        input.form-control(placeholder='例:"湖南+污染/湘江/水库-严重' id="" ng-model="state.rootKeyWord"  title="'+'表示且,'-'表示非,'/'表示或")
+      btn#addfilter.btn.btn-default.btn-success(ng-click="extract()")
+        span.fa.fa-search
+          | 抽取
+script(type="text/ng-template" id="mapview.html")
+  #sidebar.sidebar.collapsed
+    .sidebar-tabs
+      ul(role='tablist')
+        li
+          a(href='#folder', role='tab')
+            i.fa.fa-folder-open-o
+        li
+          a(href='#events', role='tab')
+            i.fa.fa-list-ol
+        li
+          a(href='#setting', role='tab')
+            i.fa.fa-cog
+    .sidebar-content
+      #folder.sidebar-pane
+        h2.sidebar-header 文档
+          span.sidebar-close
+            i.fa.fa-caret-right
+        abn-tree(conte-menu="state.leftmenuOptions" tree-data = "state.my_treedata" tree-control= "my_tree" icon-leaf="fa fa-file-text-o" icon-expand="fa fa-chevron-right" icon-collapse="fa fa-chevron-down"  expand-level="2" on-select="my_tree_handler(branch)" ng-init="state.my_treedata="+userTreeData) 
+
+      #events.sidebar-pane
+        h2.sidebar-header 事件
+          span.sidebar-close
+            i.fa.fa-caret-right
+        div(filter-form)
+      #setting.sidebar-pane
+        h2.sidebar-header 设置
+          span.sidebar-close
+            i.fa.fa-caret-right
+        .panel.panel-default
+          .panel-heading 功能设置
+          .panel-body
+            form.form-horizontal(role="form")
+              .form-group
+                label.col-sm-4.control-label 绘制轨迹
+                .col-sm-8
+                  toggle-switch.switch-success(ng-model="state.showTrace" on-label="显示"
+              off-label="关闭")
+        .panel.panel-default
+          .panel-heading 时间设置
+          .panel-body
+            form.form-horizontal(role="form")
+              .form-group
+                label.col-sm-2.control-label(for="START") 月初
+                .col-sm-10
+                  input.form-control(type="number"  id="START" placeholder="日期")
+              .form-group
+                label.col-sm-2.control-label(for="END") 月末
+                .col-sm-10
+                  input.form-control(type="number"  id="END" placeholder="日期")
+              .form-group
+                label.col-sm-2.control-label(for="TMO") 上午
+                .col-sm-10
+                  input.form-control(type="number"  id="TMO" placeholder="时间")
+              .form-group
+                label.col-sm-2.control-label(for="TAF") 下午
+                .col-sm-10
+                  input.form-control(type="number"  id="TAF" placeholder="时间")
+
+        .panel.panel-default
+          .panel-heading 显示设置
+          .panel-body  
+            form.form-horizontal(role="form")
+              .form-group
+                label.col-sm-4.control-label 时间轴
+                .col-sm-8
+                  toggle-switch.switch-success(ng-model="state.showTimeLine" on-label="开启"
+              off-label="关闭")
+              .form-group
+                label.col-sm-4.control-label 信息窗
+                .col-sm-8
+                  toggle-switch.switch-success(ng-model="state.showGalley" on-label="开启"
+              off-label="关闭")
+              .form-group
+                label.col-sm-4.control-label 显示所有记录
+                .col-sm-8
+                  toggle-switch.switch-success(ng-model="state.ShowAllPoints" on-label="开启"
+              off-label="关闭")
+  #map.sidebar-map
+  drag-able(dd-height= "300px" dd-width= "400px" dd-show="state.showGalley")
+    h3 asdfasf
+  div(pageslide ps-open="state.showTimeLine"  ps-click-outside="false" ps-container="map" ps-side="bottom"  ps-size ="200px" ps-push="true")
+   a.close-popup(ng-click="closeTimeLine()") x

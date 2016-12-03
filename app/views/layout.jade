@@ -1,0 +1,9 @@
+doctype html
+html#ng-app(ng-app='myApp')
+	head
+		include ./includes/head
+	body
+		div(ng-controller="index")
+			div(my-nav)
+			block content
+			include ./includes/ng-template

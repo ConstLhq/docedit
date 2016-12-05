@@ -75,7 +75,9 @@ exports.dataInput = function(req, res) {
           }
           var html = "<p>" + data + "</p>"
           var raw = data;
+          console.log(data)
           parser.parseString("<All>"+raw+"</All>",function(err,results){
+            console.log(results)
 
 
             var doc = new Mydoc({
@@ -86,7 +88,15 @@ exports.dataInput = function(req, res) {
             htmlContent: html,
             // Sentences: raw.replace(/[。？！]/g, "$&>>>").split(">>>"),
             Sentences: raw.replace(/<\/EVENT>/g, "$&||").split("||"),
-            Events:results.All.EVENT,
+            Events:results.All.EVENT.map(function(event){
+              console.log(event)
+              return {
+                CONTENT:event.CONTENT[0],
+                LAT:event.GEO[0].split(";")[1],
+                LON:event.GEO[0].split(";")[0],
+                TIME:"TIME" in event?event.TIME[0]:"NONE"
+              }
+            }),
             groupName: req.body.docGroup,
           })
           console.log(JSON.stringify(results.All.EVENT))

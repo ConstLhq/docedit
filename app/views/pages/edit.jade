@@ -7,8 +7,8 @@ html#ng-app(ng-app='myApp')
     div(ng-controller="edit")
       div(edit-nav)
       //-文档视图
-      div(ng-show="state.showdocview")
+      div#docview(ng-show="state.showdocview")
         div(doc-panels)
       //-地图视图
-      dvi(ng-if="!state.showdocview")
+      div#mapview(ng-show="!state.showdocview")
         div(map-view)

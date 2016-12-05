@@ -70,7 +70,7 @@ script(type="text/ng-template" id="indexnav.html")
             .modal-footer
               button.btn.btn-default(type="button", data-dismiss="modal") 关闭
               button.btn.btn-success(type="submit") 登录
-//-
+
 script(type="text/ng-template" id="editnav.html")
   nav.navbar.navbar-default(role='navigation')
     .container-fluid
@@ -124,7 +124,7 @@ script(type="text/ng-template" id="docview.html")
               span.fa.fa-check
       abn-tree(conte-menu="state.leftmenuOptions" tree-data = "state.my_treedata" tree-control= "my_tree" icon-leaf="fa fa-file-text-o" icon-expand="fa fa-chevron-right" icon-collapse="fa fa-chevron-down"  expand-level="2" on-select="my_tree_handler(branch)" ng-init="state.my_treedata="+userTreeData) 
     #doc.split.split-horizontal
-      #docContent(ng-scrollbars ng-scrollbars-config="state.scrollbarconfig" context-menu="state.middlemenuOptions")
+      #docContent(context-menu="state.middlemenuOptions")
         h3 尚未选择文档
     #result.split.split-horizontal
       .toolbar(style="border-style:groove" ng-show="state.selectedDocId!=undefined")
@@ -145,13 +145,7 @@ script(type="text/ng-template" id="docview.html")
             |地图
         a.btn.btn-xs.btn-default(href="#" ng-click="collapseEdit()" title="隐藏编辑视图" style="right:8px;position:absolute")
           span.fa.fa-indent
-      ul.list-group(ng-scrollbars ng-scrollbars-config="state.scrollbarconfig")
-        li.list-group-item(ng-repeat="result in state.results")
-         h4.text-primary 时间：{{result.TIME[0]}}
-         h4.text-warning 位置：{{result.GEO[0]}}
-         div
-           h4(style = "float:left") 内容：
-           h4(style = "padding-left:40px") {{result.CONTENT[0]}}
+      div(filter-result)
       //-添加筛选工具的panel
       div(pageslide ps-open="state.filterChecked"  ps-click-outside="true" ps-container="result" ps-side="top"  ps-size ="120px" ps-push="false")
         div(filter-form)
@@ -223,11 +217,21 @@ script(type="text/ng-template" id="filter.html")
   h6.text-center 添加抽取条件
   form.form-horizontal(role='form')
     #root.form-group 
-      .col-sm-9.col-sm-offset-1  
+      .col-sm-10.col-sm-offset-1  
         input.form-control(placeholder='例:"湖南+污染/湘江/水库-严重' id="" ng-model="state.rootKeyWord"  title="'+'表示且,'-'表示非,'/'表示或")
-      btn#addfilter.btn.btn-default.btn-success(ng-click="extract()")
-        span.fa.fa-search
-          | 抽取
+      //- btn#addfilter.btn.btn-default.btn-success(ng-click="extract()")
+      //-   span.fa.fa-search
+      //-     | 抽取
+
+script(type="text/ng-template",id = "filter-result.html")
+  ul.list-group
+    li.list-group-item(ng-repeat="result in state.results | filter :extract")
+     h4.text-primary 时间：{{result.TIME}}
+     h4.text-warning 经纬度：{{result.LON}},{{result.LAT}}
+     div
+       h4(style = "float:left") 内容：
+       h4(style = "padding-left:40px") {{result.CONTENT}}
+
 script(type="text/ng-template" id="mapview.html")
   #sidebar.sidebar.collapsed
     .sidebar-tabs
@@ -246,13 +250,14 @@ script(type="text/ng-template" id="mapview.html")
         h2.sidebar-header 文档
           span.sidebar-close
             i.fa.fa-caret-right
-        abn-tree(conte-menu="state.leftmenuOptions" tree-data = "state.my_treedata" tree-control= "my_tree" icon-leaf="fa fa-file-text-o" icon-expand="fa fa-chevron-right" icon-collapse="fa fa-chevron-down"  expand-level="2" on-select="my_tree_handler(branch)" ng-init="state.my_treedata="+userTreeData) 
+        abn-tree(conte-menu="state.leftmenuOptions" tree-data = "state.my_treedata" tree-control= "my_tree" icon-leaf="fa fa-file-text-o" icon-expand="fa fa-chevron-right" icon-collapse="fa fa-chevron-down"  expand-level="2" on-select="my_tree_handler(branch)" ng-init="state.my_treedata="+userTreeData)
 
       #events.sidebar-pane
         h2.sidebar-header 事件
           span.sidebar-close
             i.fa.fa-caret-right
         div(filter-form)
+        div(filter-result)
       #setting.sidebar-pane
         h2.sidebar-header 设置
           span.sidebar-close
@@ -265,6 +270,21 @@ script(type="text/ng-template" id="mapview.html")
                 label.col-sm-4.control-label 绘制轨迹
                 .col-sm-8
                   toggle-switch.switch-success(ng-model="state.showTrace" on-label="显示"
+              off-label="关闭")
+              .form-group
+                label.col-sm-4.control-label 时间轴
+                .col-sm-8
+                  toggle-switch.switch-success(ng-model="state.showTimeLine" on-label="开启"
+              off-label="关闭")
+              .form-group
+                label.col-sm-4.control-label 信息窗
+                .col-sm-8
+                  toggle-switch.switch-success(ng-model="state.showGalley" on-label="开启"
+              off-label="关闭")
+              .form-group
+                label.col-sm-4.control-label 显示全部
+                .col-sm-8
+                  toggle-switch.switch-success(ng-model="state.ShowAllPoints" on-label="开启"
               off-label="关闭")
         .panel.panel-default
           .panel-heading 时间设置
@@ -286,28 +306,13 @@ script(type="text/ng-template" id="mapview.html")
                 label.col-sm-2.control-label(for="TAF") 下午
                 .col-sm-10
                   input.form-control(type="number"  id="TAF" placeholder="时间")
-
-        .panel.panel-default
-          .panel-heading 显示设置
-          .panel-body  
-            form.form-horizontal(role="form")
-              .form-group
-                label.col-sm-4.control-label 时间轴
-                .col-sm-8
-                  toggle-switch.switch-success(ng-model="state.showTimeLine" on-label="开启"
-              off-label="关闭")
-              .form-group
-                label.col-sm-4.control-label 信息窗
-                .col-sm-8
-                  toggle-switch.switch-success(ng-model="state.showGalley" on-label="开启"
-              off-label="关闭")
-              .form-group
-                label.col-sm-4.control-label 显示所有记录
-                .col-sm-8
-                  toggle-switch.switch-success(ng-model="state.ShowAllPoints" on-label="开启"
-              off-label="关闭")
   #map.sidebar-map
-  drag-able(dd-height= "300px" dd-width= "400px" dd-show="state.showGalley")
-    h3 asdfasf
-  div(pageslide ps-open="state.showTimeLine"  ps-click-outside="false" ps-container="map" ps-side="bottom"  ps-size ="200px" ps-push="true")
-   a.close-popup(ng-click="closeTimeLine()") x
+    drag-able(dd-height= "100px" dd-width= "400px" dd-show="state.showGalley")
+      .panel.panel-info
+        .panel-heading 节点信息
+        #popupinfo.panel-body
+  div(pageslide ps-open="state.showTimeLine"  ps-click-outside="false" ps-container="mapview" ps-side="bottom"  ps-size ="300px" ps-push="true" style="background:rgba(255,255,255,0.5)")
+   div
+      a.close-popup(ng-click="closeTimeLine()") x
+      p &nbsp;
+   div#timeline(time-line)

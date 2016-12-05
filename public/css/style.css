@@ -214,10 +214,14 @@ location{
 
 @media (min-width: 768px){
 .sidebar {
-    top: 60px;
+    /*top: 60px;*/
     bottom: 0px;
     left:0px;
     transition: width 500ms;
+}
+
+.sidebar.collapsed {
+    opacity: 0.6
 }
 }
 .close-popup {
@@ -225,5 +229,8 @@ location{
     margin-right: 14px;
     font-size: 20px;
     text-decoration: none;
-    color: #aaaaaa;
+    color: #ff0000;
+}
+.split.split-horizontal{
+  overflow-y: scroll!important;
 }

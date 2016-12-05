@@ -34,6 +34,7 @@ angular.module('ng-dragable-div', [])
 				dragable.style.cursor = 'move';
 				dragable.style.top = param.top;
 				dragable.style.left = param.left;
+				console.log(dragable.style.left)
 				if ($scope.ddShow) {
 					dragable.style.display = "block";
 				} else {
@@ -61,20 +62,22 @@ angular.module('ng-dragable-div', [])
 					$scope.$apply()
 				}
 				dragable.insertBefore(closeIcon, dragable.firstChild)
-				body.appendChild(dragable);
+				document.getElementById("mapview").appendChild(dragable);
 				var clicked = "N";
-				var mausx, mausy, winx, winy, difx, dify;
+				var mausx=0, mausy=0, winx=0, winy=0, difx=0, dify=0;
 				angular.element(document.querySelector("html")).on('mousemove', function(event) {
 					mausx = event.pageX;
 					mausy = event.pageY;
-					winx = document.querySelector("." + param.className).offsetLeft;
-					winy = document.querySelector("." + param.className).offsetTop;
+					winx = document.querySelector("." + param.className).offsetLeft || parseInt(param.left);
+					winy = document.querySelector("." + param.className).offsetTop || parseInt(param.top);
 					if (clicked == "N") {
 						difx = mausx - winx;
 						dify = mausy - winy;
 					}
 					var newx = event.pageX - difx - angular.element(document.querySelector("." + param.className)).css("marginLeft").replace("px", "");
 					var newy = event.pageY - dify - angular.element(document.querySelector("." + param.className)).css("marginTop").replace("px", "");
+					param.left=newx+"px"
+					param.top=newy+"px"
 					angular.element(document.querySelector("." + param.className)).css("left", newx + "px");
 					angular.element(document.querySelector("." + param.className)).css("top", newy + "px");
 				});

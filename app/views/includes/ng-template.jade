@@ -35,11 +35,11 @@ script(type="text/ng-template" id="indexnav.html")
               li.active
                 a(href='/') 首页
               li
-                a(href='https://pro.leanote.com') 信息提取
+                a(href='#') 信息提取
               li
-                a#leanoteApp(href='http://app.leanote.com') 地图视图
+                a#leanoteApp(href='#') 地图视图
               li
-                a(href='http://lea.leanote.com') 关于
+                a(href='#') 关于
     #signupModal.modal.fade
       .modal-dialog
         .modal-content
@@ -88,8 +88,8 @@ script(type="text/ng-template" id="editnav.html")
       .collapse.navbar-collapse
         form.navbar-form.navbar-left(role='search')
           .form-group
-            input.form-control(type='text', placeholder='Search')
-            button.btn.btn-default(type='submit') 
+            input.form-control(type='text', placeholder='Search' disabled)
+            button.btn.btn-default(type='submit' disabled) 
               i.fa.fa-search
               | 搜文档
         -if (user)
@@ -122,7 +122,10 @@ script(type="text/ng-template" id="docview.html")
               span.fa.fa-times
             a.btn.btn-default.btn-xs.btn.btn-success(role="button" ng-click="submitAddnewGroup()")
               span.fa.fa-check
-      abn-tree(conte-menu="state.leftmenuOptions" tree-data = "state.my_treedata" tree-control= "my_tree" icon-leaf="fa fa-file-text-o" icon-expand="fa fa-chevron-right" icon-collapse="fa fa-chevron-down"  expand-level="2" on-select="my_tree_handler(branch)" ng-init="state.my_treedata="+userTreeData) 
+      //- abn-tree(tree-data="my_treedata" tree-control="my_tree" on-select="my_tree_handler(branch)" expand-level="3" initial-selection="Granny Smith") 
+      treecontrol(class="tree-classic" tree-model="state.my_treedata" options="state.tree_options" expanded-nodes="state.expanded_nodes" on-selection="my_tree_handler(node)" selected-node="state.selectedNode" ng-init="state.my_treedata="+userTreeData) {{node.label}}
+      //- ng-init="my_treedata="+userTreeData
+      //- +userTreeData
     #doc.split.split-horizontal
       #docContent(context-menu="state.middlemenuOptions")
         h3 尚未选择文档
@@ -145,7 +148,7 @@ script(type="text/ng-template" id="docview.html")
             |地图
         a.btn.btn-xs.btn-default(href="#" ng-click="collapseEdit()" title="隐藏编辑视图" style="right:8px;position:absolute")
           span.fa.fa-indent
-      div(filter-result)
+      //- div(filter-result)
       //-添加筛选工具的panel
       div(pageslide ps-open="state.filterChecked"  ps-click-outside="true" ps-container="result" ps-side="top"  ps-size ="120px" ps-push="false")
         div(filter-form)
@@ -153,7 +156,7 @@ script(type="text/ng-template" id="docview.html")
       div(pageslide ps-open="state.isEditCollapsed"  ps-click-outside="false" ps-container="doc" ps-side="right"  ps-size ="20px" ps-push="true")
         a(href="#" ng-click="collapseEdit()" title="显示编辑视图")
           span.fa.fa-outdent
-  div(pageslide ps-open="state.uploadChecked"  ps-container="doc"  ps-click-outside ="false" ps-side="top"  ps-size ="600px" ps-push="false" )
+  div(pageslide ps-open="state.uploadChecked"  ps-container="doc"  ps-click-outside ="true" ps-side="top"  ps-size ="600px" ps-push="false" )
     div.container
       #fileupload(nv-file-drop='', uploader='uploader', filters='queueLimit, customFilter')
         .row-fluid
@@ -209,9 +212,9 @@ script(type="text/ng-template" id="docview.html")
                       button.btn.btn-danger.btn-s(type='button', ng-click='uploader.clearQueue()', ng-disabled='!uploader.queue.length')
                         span.glyphicon.glyphicon-trash
                         |  删除  
-        .row-fluid
-          .col-md-1.col-md-offset-8
-            btn.btn.btn-danger(ng-click="uploadToggle()") 收起
+        //- .row-fluid
+        //-   .col-md-1.col-md-offset-8
+        //-     btn.btn.btn-danger(ng-click="uploadToggle()") 收起
 
 script(type="text/ng-template" id="filter.html")
   h6.text-center 添加抽取条件
@@ -227,7 +230,8 @@ script(type="text/ng-template",id = "filter-result.html")
   ul.list-group
     li.list-group-item(ng-repeat="result in state.results | filter :extract")
      h4.text-primary 时间：{{result.TIME}}
-     h4.text-warning 经纬度：{{result.LON}},{{result.LAT}}
+     h4.text-primary 地点：{{result.LOC}}
+     h4.text-warning 经纬度：{{result.LNG}},{{result.LAT}}
      div
        h4(style = "float:left") 内容：
        h4(style = "padding-left:40px") {{result.CONTENT}}
@@ -250,14 +254,14 @@ script(type="text/ng-template" id="mapview.html")
         h2.sidebar-header 文档
           span.sidebar-close
             i.fa.fa-caret-right
-        abn-tree(conte-menu="state.leftmenuOptions" tree-data = "state.my_treedata" tree-control= "my_tree" icon-leaf="fa fa-file-text-o" icon-expand="fa fa-chevron-right" icon-collapse="fa fa-chevron-down"  expand-level="2" on-select="my_tree_handler(branch)" ng-init="state.my_treedata="+userTreeData)
+        //- abn-tree(conte-menu="state.leftmenuOptions" tree-data = "state.my_treedata" tree-control= "my_tree" icon-leaf="fa fa-file-text-o" icon-expand="fa fa-chevron-right" icon-collapse="fa fa-chevron-down"  expand-level="0" on-select="my_tree_handler(branch)" ng-init="state.my_treedata="+userTreeData)
 
       #events.sidebar-pane
         h2.sidebar-header 事件
           span.sidebar-close
             i.fa.fa-caret-right
-        div(filter-form)
-        div(filter-result)
+        //- div(filter-form)
+        //- div(filter-result)
       #setting.sidebar-pane
         h2.sidebar-header 设置
           span.sidebar-close

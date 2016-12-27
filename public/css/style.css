@@ -234,3 +234,6 @@ location{
 .split.split-horizontal{
   overflow-y: scroll!important;
 }
+p{
+  text-indent: 2em;
+}

@@ -23,4 +23,7 @@ router.get("/user/mygroup",User.usergroup)
 router.post("/user/newgroup",User.postnewgroup)
 router.post("/user/doc",User.doc)
 router.post("/edit/extract",Index.extract)
+router.get("/edit/path",Index.path)
+router.post("/edit/devide",uploadController.devide)
+router.post("/edit/reparse",uploadController.reparse)
 module.exports = router;

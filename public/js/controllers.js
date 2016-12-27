@@ -1,7 +1,7 @@
 'use strict';
 angular
-	.module('myApp', ["ng-dragable-div", "angularFileUpload", 'frapontillo.bootstrap-switch', "angularBootstrapNavTree", "pageslide-directive", "ngScrollbars", "ui.bootstrap.contextMenu", "toggle-switch"])
-	.service("getInfoServe", ["$http", function(http) {
+	.module('myApp', ["ng-dragable-div", "angularFileUpload", 'frapontillo.bootstrap-switch', "angularBootstrapNavTree", "pageslide-directive", "ngScrollbars", "ui.bootstrap.contextMenu", "toggle-switch", "treeControl"])
+	.service("httpService", ["$http", function(http) {
 		var groupObj = {};
 		var watchedgeoinfo = {};
 		var getGroup = function() {
@@ -67,8 +67,45 @@ angular
 			// watchedgeoinfo=[{"lat": 24.886083, "image_url": "http://127.0.0.1:3000/img/kunming.jpg", "lon": 102.839608, "location": "昆明", "thumb": "http://127.0.0.1:3000/thumb/kunming.jpg"}, {"lat": 22.015601, "image_url": "http://127.0.0.1:3000/img/banna.jpg", "lon": 100.803477, "location": "版纳", "thumb": "http://127.0.0.1:3000/thumb/banna.jpg"}, {"lat": 22.175626, "image_url": "http://127.0.0.1:3000/img/yexianggu.jpg", "lon": 100.865759, "location": "野象谷", "thumb": "http://127.0.0.1:3000/thumb/yexianggu.jpg"}, {"lat": 21.857003, "image_url": "http://127.0.0.1:3000/img/daizucunzhai.jpg", "lon": 100.956585, "location": "傣族村寨", "thumb": "http://127.0.0.1:3000/thumb/daizucunzhai.jpg"}, {"lat": 22.033046, "image_url": "http://127.0.0.1:3000/img/yuanshisenlingongyuan.jpg", "lon": 100.881258, "location": "原始森林公园", "thumb": "http://127.0.0.1:3000/thumb/yuanshisenlingongyuan.jpg"}, {"lat": 26.882759, "image_url": "http://127.0.0.1:3000/img/lijiang.jpg", "lon": 100.234432, "location": "丽江", "thumb": "http://127.0.0.1:3000/thumb/lijiang.jpg"}, {"lat": 27.034013, "image_url": "http://127.0.0.1:3000/img/yulongxueshan.jpg", "lon": 100.270093, "location": "玉龙雪山", "thumb": "http://127.0.0.1:3000/thumb/yulongxueshan.jpg"}, {"lat": 26.98274, "image_url": "http://127.0.0.1:3000/img/bingchuandasuodao.jpg", "lon": 100.205666, "location": "冰川大索道", "thumb": "http://127.0.0.1:3000/thumb/bingchuandasuodao.jpg"}, {"lat": 27.131623, "image_url": "http://127.0.0.1:3000/img/lanyuegu.jpg", "lon": 100.251243, "location": "蓝月谷", "thumb": "http://127.0.0.1:3000/thumb/lanyuegu.jpg"}, {"lat": 27.012612, "image_url": "http://127.0.0.1:3000/img/dongbagu.jpg", "lon": 100.267728, "location": "东巴谷", "thumb": "http://127.0.0.1:3000/thumb/dongbagu.jpg"}, {"lat": 25.916365, "image_url": "http://127.0.0.1:3000/img/shuanglang.jpg", "lon": 100.200271, "location": "双廊", "thumb": "http://127.0.0.1:3000/thumb/shuanglang.jpg"}, {"lat": 25.69349, "image_url": "http://127.0.0.1:3000/img/daligucheng.jpg", "lon": 100.170377, "location": "大理古城", "thumb": "http://127.0.0.1:3000/thumb/daligucheng.jpg"}, {"lat": 25.612056, "image_url": "http://127.0.0.1:3000/img/dali.jpg", "lon": 100.27451, "location": "大理", "thumb": "http://127.0.0.1:3000/thumb/dali.jpg"}, {"lat": 25.697499, "image_url": "http://127.0.0.1:3000/img/baizuminju.jpg", "lon": 100.266166, "location": "白族民居", "thumb": "http://127.0.0.1:3000/thumb/baizuminju.jpg"}, {"lat": 25.711798, "image_url": "http://127.0.0.1:3000/img/chongshengsisanta.jpg", "lon": 100.155887, "location": "崇圣寺三塔", "thumb": "http://127.0.0.1:3000/thumb/chongshengsisanta.jpg"}, {"lat": 24.92558, "image_url": "http://127.0.0.1:3000/img/anning.jpg", "lon": 102.484553, "location": "安宁", "thumb": "http://127.0.0.1:3000/thumb/anning.jpg"}, {"lat": 24.823049, "image_url": "http://127.0.0.1:3000/img/shilin.jpg", "lon": 103.332585, "location": "石林", "thumb": "http://127.0.0.1:3000/thumb/shilin.jpg"}]
 
 		}
+		var getPath = function() {
+			return http.get('/edit/path')
+				.success(function(path) {
+					return path
+				})
+				.error(function(data) {
+					console.log(data)
+				})
 
+			// watchedgeoinfo=[{"lat": 24.886083, "image_url": "http://127.0.0.1:3000/img/kunming.jpg", "lon": 102.839608, "location": "昆明", "thumb": "http://127.0.0.1:3000/thumb/kunming.jpg"}, {"lat": 22.015601, "image_url": "http://127.0.0.1:3000/img/banna.jpg", "lon": 100.803477, "location": "版纳", "thumb": "http://127.0.0.1:3000/thumb/banna.jpg"}, {"lat": 22.175626, "image_url": "http://127.0.0.1:3000/img/yexianggu.jpg", "lon": 100.865759, "location": "野象谷", "thumb": "http://127.0.0.1:3000/thumb/yexianggu.jpg"}, {"lat": 21.857003, "image_url": "http://127.0.0.1:3000/img/daizucunzhai.jpg", "lon": 100.956585, "location": "傣族村寨", "thumb": "http://127.0.0.1:3000/thumb/daizucunzhai.jpg"}, {"lat": 22.033046, "image_url": "http://127.0.0.1:3000/img/yuanshisenlingongyuan.jpg", "lon": 100.881258, "location": "原始森林公园", "thumb": "http://127.0.0.1:3000/thumb/yuanshisenlingongyuan.jpg"}, {"lat": 26.882759, "image_url": "http://127.0.0.1:3000/img/lijiang.jpg", "lon": 100.234432, "location": "丽江", "thumb": "http://127.0.0.1:3000/thumb/lijiang.jpg"}, {"lat": 27.034013, "image_url": "http://127.0.0.1:3000/img/yulongxueshan.jpg", "lon": 100.270093, "location": "玉龙雪山", "thumb": "http://127.0.0.1:3000/thumb/yulongxueshan.jpg"}, {"lat": 26.98274, "image_url": "http://127.0.0.1:3000/img/bingchuandasuodao.jpg", "lon": 100.205666, "location": "冰川大索道", "thumb": "http://127.0.0.1:3000/thumb/bingchuandasuodao.jpg"}, {"lat": 27.131623, "image_url": "http://127.0.0.1:3000/img/lanyuegu.jpg", "lon": 100.251243, "location": "蓝月谷", "thumb": "http://127.0.0.1:3000/thumb/lanyuegu.jpg"}, {"lat": 27.012612, "image_url": "http://127.0.0.1:3000/img/dongbagu.jpg", "lon": 100.267728, "location": "东巴谷", "thumb": "http://127.0.0.1:3000/thumb/dongbagu.jpg"}, {"lat": 25.916365, "image_url": "http://127.0.0.1:3000/img/shuanglang.jpg", "lon": 100.200271, "location": "双廊", "thumb": "http://127.0.0.1:3000/thumb/shuanglang.jpg"}, {"lat": 25.69349, "image_url": "http://127.0.0.1:3000/img/daligucheng.jpg", "lon": 100.170377, "location": "大理古城", "thumb": "http://127.0.0.1:3000/thumb/daligucheng.jpg"}, {"lat": 25.612056, "image_url": "http://127.0.0.1:3000/img/dali.jpg", "lon": 100.27451, "location": "大理", "thumb": "http://127.0.0.1:3000/thumb/dali.jpg"}, {"lat": 25.697499, "image_url": "http://127.0.0.1:3000/img/baizuminju.jpg", "lon": 100.266166, "location": "白族民居", "thumb": "http://127.0.0.1:3000/thumb/baizuminju.jpg"}, {"lat": 25.711798, "image_url": "http://127.0.0.1:3000/img/chongshengsisanta.jpg", "lon": 100.155887, "location": "崇圣寺三塔", "thumb": "http://127.0.0.1:3000/thumb/chongshengsisanta.jpg"}, {"lat": 24.92558, "image_url": "http://127.0.0.1:3000/img/anning.jpg", "lon": 102.484553, "location": "安宁", "thumb": "http://127.0.0.1:3000/thumb/anning.jpg"}, {"lat": 24.823049, "image_url": "http://127.0.0.1:3000/img/shilin.jpg", "lon": 103.332585, "location": "石林", "thumb": "http://127.0.0.1:3000/thumb/shilin.jpg"}]
 
+		}
+
+		var devidePara = function(docid, str) {
+			return http.post('/edit/devide', {
+					"str": str,
+					"docid": docid
+				})
+				.success(function(newhtml) {
+					return newhtml
+				})
+				.error(function(data) {
+					console.log(data)
+				})
+
+		}
+
+		var reparse = function(docid) {
+			return http.post('/edit/reparse', {
+					"docid": docid
+				})
+				.success(function(events) {
+					return events
+				})
+				.error(function(data) {
+					console.log(data)
+				})
+
+		}
 
 		return {
 			"getGroup": getGroup,
@@ -78,7 +115,10 @@ angular
 			"geoinfo": geoinfo,
 			"getGeoInfo": function() {
 				return watchedgeoinfo
-			}
+			},
+			"getPath": getPath,
+			"devidePara": devidePara,
+			"reparse": reparse,
 		}
 	}])
 	.controller('index', ['$scope', function(scope) {}])
@@ -96,7 +136,7 @@ angular
 			replace: false,
 		}
 	})
-	.controller('edit', ["$scope", "FileUploader", "getInfoServe", "$window", function(scope, FileUploader, getInfoServe, $window) {
+	.controller('edit', ["$scope", "FileUploader", "httpService", "$window", function(scope, FileUploader, httpService, $window) {
 		var uploader = scope.uploader = new FileUploader({
 			url: '/fileUpload'
 		});
@@ -123,10 +163,24 @@ angular
 			}
 		});
 
+		scope.my_tree = {}
+
 		uploader.onCompleteItem = function(fileItem, response, status, headers) {
 
-			getInfoServe.postGroup("").success(function(data) {
+			httpService.postGroup("").success(function(data) {
 				scope.state.my_treedata = data;
+				console.log(scope.my_treedata)
+				//自动展开
+				scope.state.expanded_nodes=(function(arr){var temp=[];for(var i =0;i<arr.length;i++){
+					temp.push(arr[i])
+				}return temp})(data)
+	
+				//自动打开刚刚上传的文档
+				// response中包含文档信息
+				scope.state.selectedNode=scope.state.my_treedata[response[0]]["children"][response[1]]
+				scope.my_tree_handler(scope.state.selectedNode)
+				scope.uploadToggle()
+				
 			})
 
 		};
@@ -147,6 +201,23 @@ angular
 			"showTrace": false,
 			"results": [],
 			"rootKeyWord": "",
+			"selectedDocId": "",
+			"selectedNode": "",
+			"tree_options": {
+				nodeChildren: "children",
+				dirSelectable: false,
+				injectClasses: {
+					ul: "a1",
+					li: "a2",
+					liSelected: "a7",
+					iExpanded: "a3",
+					iCollapsed: "a4",
+					iLeaf: "a5",
+					label: "a6",
+					labelSelected: "a8"
+				}
+			},
+			"expanded_nodes":[],
 			"scrollbarconfig": {
 				autoHideScrollbar: false,
 				theme: 'light',
@@ -159,7 +230,7 @@ angular
 			},
 			"dictionary": {
 				LAT: "经度",
-				LON: "纬度",
+				LNG: "纬度",
 				TIME: "时间",
 				CONTENT: "事件"
 			},
@@ -179,6 +250,7 @@ angular
 				}],
 				['重新解析', function($itemScope, $event, modelValue, text, $li) {
 					$scope.selected = $itemScope.item.name;
+
 				}],
 				['删除文件', function($itemScope, $event, modelValue, text, $li) {
 					$scope.items.splice($itemScope.$index, 1);
@@ -187,15 +259,40 @@ angular
 			"middlemenuOptions": [
 				[
 					function($itemScope, $event, modelValue, text) {
-						return "解析选中部分";
+						return "选中部分分段";
 					},
 					function($itemScope, $event) {
 						console.log($window.getSelection().toString())
+						httpService.devidePara(scope.state.selectedDocId, $window.getSelection().toString()).success(
+							function(newhtml) {
+								angular.element('#docContent').html(newhtml)
+							})
+
+
 
 						//post selection part
 					},
 					function($itemScope, $event, modelValue, text) {
 						return $window.getSelection().toString() != "";
+					}
+				],
+				[
+					function($itemScope, $event, modelValue, text) {
+						return "重新解析";
+					},
+					function($itemScope, $event) {
+						// console.log($window.getSelection().toString())
+
+						httpService.reparse(scope.state.selectedDocId).success(
+							function(newevents) {
+								scope.state.results = newevents;
+								scope.$apply();
+							})
+
+						//post selection part
+					},
+					function($itemScope, $event, modelValue, text) {
+						return true //$window.getSelection().toString() != "";
 					}
 				],
 				[
@@ -207,52 +304,35 @@ angular
 						// post delete the 
 					},
 					function($itemScope, $event, modelValue, text, $li) {
-						return $window.getSelection().toString() != "";
+						return false //$window.getSelection().toString() != "";
 					}
 				]
 			]
 		}
 
-		// scope.extract = function() {
-		//根据构造条件生成规则
-
-		// var queryString = scope.state.rootKeyWord
-		// var queryFilters = queryString.replace(/[+-\/]/g, "###$&").split("###")
-		// var filter = [{
-		// 	keyword: queryFilters.shift()
-		// }]
-		// for (var i = 0; i < queryFilters.length; i++) {
-		// 	var additionalFilter = queryFilters.map(function(item) {
-		// 		switch (item[0]) {
-		// 			case "+":
-		// 				return {
-		// 					logic: "and",
-		// 					keyword: item.slice(1, item.length)
-		// 				}
-		// 			case "-":
-		// 				return {
-		// 					logic: "not",
-		// 					keyword: item.slice(1, item.length)
-		// 				}
-		// 			case "/":
-		// 				return {
-		// 					logic: "or",
-		// 					keyword: item.slice(1, item.length)
-		// 				}
-		// 		}
-		// 	})
-		// 	var filter = filter.concat(additionalFilter)
-		// }
-		// getInfoServe.extract(filter, scope.state.selectedDocId).success(function(list) {
-		// 	scope.state.results = list
-
-		// })
-		// }
-
+		scope.my_treedata = [{
+				"label": "默认分组",
+				"children": [{
+					"label": "首例寨卡.txt",
+					"docid": "586200e2e2c43c2c430a5b38"
+				}, {
+					"label": "首例寨卡.txt",
+					"docid": "586200fce2c43c2c430a5b39"
+				}, {
+					"label": "首例寨卡.txt",
+					"docid": "586201a6e2c43c2c430a5b3a"
+				}, {
+					"label": "首例寨卡.txt",
+					"docid": "586201dae2c43c2c430a5b3b"
+				}, {
+					"label": "首例寨卡.txt",
+					"docid": "58620251e2c43c2c430a5b3c"
+				}]
+			}] //[      {        label: 'North America',        children: [          {            label: 'Canada',            children: ['Toronto', 'Vancouver']          }, {            label: 'USA',            children: ['New York', 'Los Angeles']          }, {            label: 'Mexico',            children: ['Mexico City', 'Guadalajara']          }        ]      }, {        label: 'South America',        children: [          {            label: 'Venezuela',            children: ['Caracas', 'Maracaibo']          }, {            label: 'Brazil',            children: ['Sao Paulo', 'Rio de Janeiro']          }, {            label: 'Argentina',            children: ['Buenos Aires', 'Cordoba']          }        ]      }    ],
 		scope.my_tree_handler = function(branch) {
 				if (branch.docid) {
 					scope.state.selectedDocId = branch.docid
-					getInfoServe.getDoc(branch.docid).success(function(html) {
+					httpService.getDoc(branch.docid).success(function(html) {
 						// angular.element('#docContent div.mCSB_container').html(html.html)
 						angular.element('#docContent').html(html.html)
 							// scope.state.scrollbarconfig = {
@@ -265,7 +345,7 @@ angular
 							// 	setHeight: angular.element("#doc").height(),
 							// 	scrollInertia: 0
 							// }
-						getInfoServe.geoinfo(branch.docid)
+						httpService.geoinfo(branch.docid)
 
 					})
 				}
@@ -274,14 +354,14 @@ angular
 			// scope.my_tree_handler_map = function(branch) {
 			// 	if (branch.docid) {
 			// 		scope.state.selectedDocId = branch.docid
-			// 		getInfoServe.geoinfo(branch.docid)
+			// 		httpService.geoinfo(branch.docid)
 
 		// 	}
 		// }
 
 
 		scope.submitAddnewGroup = function() {
-			getInfoServe.postGroup(scope.state.newGroupName).success(function(data) {
+			httpService.postGroup(scope.state.newGroupName).success(function(data) {
 				scope.state.my_treedata = data;
 				scope.state.newGroupName = "";
 			})
@@ -308,7 +388,7 @@ angular
 		}
 		scope.uploadToggle = function() {
 			scope.state.uploadChecked = !scope.state.uploadChecked
-			getInfoServe.getGroup().success(function(data) {
+			httpService.getGroup().success(function(data) {
 				scope.state.docGroup = data;
 			});
 		}
@@ -320,7 +400,7 @@ angular
 			scope.state.showTimeLine = false;
 		}
 
-		scope.$watch(getInfoServe.getGeoInfo, function(points) {
+		scope.$watch(httpService.getGeoInfo, function(points) {
 			scope.state.results = points
 		})
 
@@ -329,7 +409,7 @@ angular
 
 			if (queryString == "") {
 				return true
-			} 
+			}
 			// else{
 			// 	return JSON.stringify(event).indexOf("湖南")!=-1
 			// }
@@ -387,6 +467,11 @@ angular
 				return _filterResult;
 			}
 		}
+
+
+		// scope.$watch(function(){return scope.state.showTrace},function(){
+		// 	httpService.getPath().success(function(path))
+		// })
 
 	}])
 	.directive("docPanels", function() {
@@ -455,7 +540,7 @@ angular
 			templateUrl: "filter-result.html",
 		}
 	})
-	.directive("mapView", ["getInfoServe", function(getInfoServe) {
+	.directive("mapView", ["httpService", function(httpService) {
 		return {
 			restrict: "EA",
 			templateUrl: "mapview.html",
@@ -487,7 +572,7 @@ angular
 				var map = L.map('map', {
 					maxZoom: 18,
 					minZoom: 5
-				}).setView([10,-66.900968],5)//setView([30.8282, 112.5795], 5);
+				}).setView([30.8282, 112.5795], 5);
 				normal_layer.addTo(map)
 
 				var layerControl = new L.Control.Layers({
@@ -509,19 +594,7 @@ angular
 					recordsField: null,
 					locationMode: L.LocationModes.LATLNG,
 					latitudeField: 'LAT',
-					longitudeField: 'LON',
-					// displayOptions: {
-					//     'direct_flights': {
-					//         color: new L.HSLHueFunction([0, 200], [253, 330], {
-					//             outputLuminosity: '60%'
-					//         })
-					//     },
-					//     'code': {
-					//         title: function (value) {
-					//             return value;
-					//         }
-					//     }
-					// },
+					longitudeField: 'LNG',
 					layerOptions: {
 						fill: false,
 						stroke: false,
@@ -537,9 +610,6 @@ angular
 						var $i = $html.find('i');
 
 						L.StyleConverter.applySVGStyle($i.get(0), options);
-
-						// var directFlights = L.Util.getFieldValue(record, 'direct_flights');
-						// var size = sizeFunction.evaluate(directFlights);
 
 						var size = 36
 
@@ -574,18 +644,97 @@ angular
 							$("#popupinfo").append($(L.HTMLUtils.buildLocaneTable(record, scope.state.dictionary, '', ["content", "start", "id"])).wrap('<div/>').parent().html());
 							scope.state.showGalley = true
 							scope.$apply()
-								// allLayer.options.includeLayer = function (newRecord) {
-								//     return newRecord.airport1 === record.code || newRecord.airport2 === record.code;
-								// };
-								// allLayer.reloadData();
 						});
 					}
 				});
 
 				map.addLayer(pointLayer);
 				// layerControl.addOverlay(pointLayer, '全部位置');
+				/////////////////////////////////
+				///////////////////////////////
+				////////////////////////////
+				//////////////////////////
+				// var getLocation = function(context, locationField, fieldValues, callback) {
+				// 	var location;
+				// 	var latlng = new L.latLng(fieldValues[0][0], fieldValues[0][1])
+				// 	location = {
+				// 		location: latlng,
+				// 		text: "name",
+				// 		center: latlng
+				// 	};
+				// 	return location;
+				// };
+				// var sizeFunction = new L.LinearFunction([1, 16], [253, 48]);
+				// var goptions = {
+				// 	recordsField: null,
+				// 	locationMode: L.LocationModes.CUSTOM,
+				// 	fromField: 'from',
+				// 	toField: 'to',
+				// 	codeField: null,
+				// 	getLocation: getLocation,
+				// 	getEdge: L.Graph.EDGESTYLE.ARC,
+				// 	includeLayer: function(record) {
+				// 		return true;
+				// 	},
+				// 	layerOptions: {
+				// 		fill: false,
+				// 		opacity: 1,
+				// 		weight: 4,
+				// 		fillOpacity: 1.0,
+				// 		distanceToHeight: new L.LinearFunction([0, 0], [100, 50]),
+				// 		markers: {
+				// 			end: true
+				// 		},
+				// 		mode: 'Q'
+				// 	},
+				// 	tooltipOptions: {
+				// 		iconSize: new L.Point(200, 100),
+				// 		iconAnchor: new L.Point(-5, 64),
+				// 		className: 'leaflet-div-icon line-legend'
+				// 	},
+				// 	displayOptions: {
+				// 		cnt: {
+				// 			weight: new L.LinearFunction([0, 3], [10, 20]),
+				// 			color: new L.HSLHueFunction([0, 200], [125, 330], {
+				// 				outputLuminosity: '60%'
+				// 			}),
+				// 			 displayName: '轨迹',
+				// 		},
+				// 		info: {
+				// 			displayName: "说明",
+				// 			displayText: function(x) {
+				// 				return x
+				// 			}
+				// 		}
 
-				scope.$watch(getInfoServe.getGeoInfo, function(points) {
+				// 	}
+				// };
+
+				// scope.$watch(function() {
+				// 	return scope.state.showTrace
+				// }, function(b) {
+				// 	if (b) {
+				// 		httpService.getPath().success(function(path) {
+				// 			var arclayer = new L.Graph(path, goptions)
+				// 			arclayer.addTo(map)
+				// 		})
+				// 	} else {
+				// 		try {
+				// 			arclayer.clearLayers()
+				// 		} catch (err) {
+				// 			console.log(err);
+				// 		}
+
+				// 	}
+				// })
+
+
+				////////////////////////////////////
+				///////////////////////////////////
+				/////////////////////////////////////
+				/////////////////////////////////////
+
+				scope.$watch(httpService.getGeoInfo, function(points) {
 
 					scope.state.allPoints = points
 
@@ -619,14 +768,14 @@ angular
 					pointLayer.addData(d);
 					$("#popupinfo").empty();
 					$("#popupinfo").append($(L.HTMLUtils.buildLocaneTable(d[0], scope.state.dictionary, '', ["content", "start", "id"])).wrap('<div/>').parent().html());
-					map.setView([d[0].LAT, d[0].LON], 6);
+					map.setView([d[0].LAT, d[0].LNG], 6);
 
 				})
 
 			}
 		}
 	}])
-	.directive('timeLine', ['getInfoServe', function(getInfoServe) {
+	.directive('timeLine', ['httpService', function(httpService) {
 		return {
 			restrict: 'EA',
 			replace: true,
@@ -660,7 +809,7 @@ angular
 					timeline.fit();
 				}
 
-				scope.$watch(getInfoServe.getGeoInfo, function(points) {
+				scope.$watch(httpService.getGeoInfo, function(points) {
 
 					if (points instanceof Array) {
 
@@ -675,7 +824,7 @@ angular
 							return {
 								start: moment(p.TIME).format(),
 								content: p.TIME,
-								LON: p.LON,
+								LNG: p.LNG,
 								LAT: p.LAT,
 								CONTENT: p.CONTENT,
 								TIME: p.TIME,

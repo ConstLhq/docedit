@@ -29,6 +29,7 @@ exports.signup = function(req, res) {
           if (err) {
             console.log(err)
           }
+           req.session.user = user //注册后自动登陆
           res.redirect('/')
         })
       }

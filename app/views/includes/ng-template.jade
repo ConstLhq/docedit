@@ -70,7 +70,6 @@ script(type="text/ng-template" id="indexnav.html")
             .modal-footer
               button.btn.btn-default(type="button", data-dismiss="modal") 关闭
               button.btn.btn-success(type="submit") 登录
-
 script(type="text/ng-template" id="editnav.html")
   nav.navbar.navbar-default(role='navigation')
     .container-fluid
@@ -97,144 +96,144 @@ script(type="text/ng-template" id="editnav.html")
           span 欢迎您,#{user.name}
           span &nbsp;|&nbsp;
           a.navbar-link(href="/logout") 登出
+          a.navbar-link(href="#" ng-hide="state.showMapView" ng-click="collapseEdit()" title="隐藏编辑视图")
+            span.fa.fa-indent
         ul.nav.navbar-nav
           li
-            button.btn.btn-default.navbar-btn(type="button" ng-click="uploadToggle()")
+            button.btn.btn-default.navbar-btn(type="button" data-toggle="modal" data-target="#upload-modal")
               i.fa.fa-upload
               | 上传文档
           li
-            button.btn.btn-default.navbar-btn(type="button" ng-click="changeView()") {{state.nextview}}
+            toggle-switch.switch-success.navbar-btn(ng-model="state.showMapView" on-label="地图"
+              off-label="文档" style="padding:1px 0px;margin-left:5px")
 script(type="text/ng-template" id="docview.html")
   .parent
     #content.split.split-horizontal
-      .toolbar(style="border-style:groove")
-        a(href="#" ng-click="showAddGroupInput()" title="新建分组")
-          span.fa.fa-plus
-        span &nbsp;
-        a(href="#" ng-click="collapseContent()" title="隐藏目录")
-          span.fa.fa-outdent
-      form.form-horizontal(role='form',name="newgroupform" ng-show="state.showAddGroupInput")
-        .form-group.form-group-sm
-          .col-sm-8.col-sm-offset-1
-            input.form-control.input-sm#newgroupinput(placeholder="输入新建分组名" type="text" ng-model="state.newGroupName")
-          .col-sm-3
-            a.btn.btn-default.btn-xs.btn-warning(role="button" ng-click="hideAddGroupInput()")
-              span.fa.fa-times
-            a.btn.btn-default.btn-xs.btn.btn-success(role="button" ng-click="submitAddnewGroup()")
-              span.fa.fa-check
-      //- abn-tree(tree-data="my_treedata" tree-control="my_tree" on-select="my_tree_handler(branch)" expand-level="3" initial-selection="Granny Smith") 
+      .btn-toolbar(role="toolbar" style="border:groove;border-width:1px")
+        .btn-group
+          button.btn.btn-xs.btn-default(type="button" ng-click="showAddGroupInput()" title="新建分组")
+            span.fa.fa-plus
+              |新分组
+          button.btn.btn-xs.btn-default(type="button" ng-click="collapseContent()" title="隐藏目录")
+            span.fa.fa-outdent
+              |隐藏
+      div(ng-show="state.showAddGroupInput" style="margin-top:5px")
+        form.form-horizontal(role='form',name="newgroupform")
+          .form-group.form-group-sm
+            .col-sm-7.col-sm-offset-1
+              input.form-control.input-sm#newgroupinput(placeholder="输入新建分组名" type="text" ng-model="state.newGroupName")
+            .col-sm-4
+              .btn-group
+                a.btn.btn-default.btn-sm.btn.btn-success(role="button" ng-click="submitAddnewGroup()") 好
+                a.btn.btn-default.btn-sm.btn-warning(role="button" ng-click="hideAddGroupInput()") 否
       treecontrol(class="tree-classic" tree-model="state.my_treedata" options="state.tree_options" expanded-nodes="state.expanded_nodes" on-selection="my_tree_handler(node)" selected-node="state.selectedNode" ng-init="state.my_treedata="+userTreeData) {{node.label}}
-      //- ng-init="my_treedata="+userTreeData
-      //- +userTreeData
     #doc.split.split-horizontal
       #docContent(context-menu="state.middlemenuOptions")
         h3 尚未选择文档
     #result.split.split-horizontal
-      .toolbar(style="border-style:groove" ng-show="state.selectedDocId!=undefined")
-        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()" )
-          span.fa.fa-filter
-            |筛选 
-        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()")
-          span.fa.fa-database
-            |保存
-        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()")
-          span.fa.fa-save
-            |导出
-        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()")
-          span.fa.fa-check-square-o
-            |全选
-        a.btn.btn-xs.btn-default(href="#" ng-click="filterToggle()")
-          span.fa.fa-globe
-            |地图
-        a.btn.btn-xs.btn-default(href="#" ng-click="collapseEdit()" title="隐藏编辑视图" style="right:8px;position:absolute")
-          span.fa.fa-indent
-      //- div(filter-result)
-      //-添加筛选工具的panel
-      div(pageslide ps-open="state.filterChecked"  ps-click-outside="true" ps-container="result" ps-side="top"  ps-size ="120px" ps-push="false")
-        div(filter-form)
-      //-隐藏编辑内容后的工具条
-      div(pageslide ps-open="state.isEditCollapsed"  ps-click-outside="false" ps-container="doc" ps-side="right"  ps-size ="20px" ps-push="true")
-        a(href="#" ng-click="collapseEdit()" title="显示编辑视图")
-          span.fa.fa-outdent
-  div(pageslide ps-open="state.uploadChecked"  ps-container="doc"  ps-click-outside ="true" ps-side="top"  ps-size ="600px" ps-push="false" )
-    div.container
-      #fileupload(nv-file-drop='', uploader='uploader', filters='queueLimit, customFilter')
-        .row-fluid
-          .col-sm-9
-            div(ng-show='uploader.isHTML5') 
-              .well.my-drop-zone(nv-file-over='', uploader='uploader')
-                input(type='file', nv-file-select='', uploader='uploader')
-                h4.text-center 拖放文件到此处
-        .row-fluid
-          .col-sm-9(style='margin-bottom: 40px')
-                    table.table
-                      thead
-                        tr
-                          th(width='40%') 文件              
-                          th(ng-show='uploader.isHTML5') 大小
-                          th 状态                                 
-                          th 操作
-                      tbody
-                        tr(ng-repeat='item in uploader.queue')
-                          td
-                            strong {{ item.file.name }}
-                          td(ng-show='uploader.isHTML5', nowrap='') {{ item.file.size/1024/1024|number:2 }} MB
-                          td.text-center
-                            span(ng-show='item.isSuccess')
-                              i.glyphicon.glyphicon-ok
-                            span(ng-show='item.isCancel')
-                              i.glyphicon.glyphicon-ban-circle
-                            span(ng-show='item.isError')
-                              i.glyphicon.glyphicon-remove
-                          td(nowrap='')
-                            button.btn.btn-success.btn-xs(title='上传' type='button', ng-click='item.upload()', ng-disabled='item.isReady || item.isUploading || item.isSuccess')
-                              span.glyphicon.glyphicon-upload
-                            button.btn.btn-warning.btn-xs(title='取消' type='button', ng-click='item.cancel()', ng-disabled='!item.isUploading')
-                              span.glyphicon.glyphicon-ban-circle
-                            button.btn.btn-danger.btn-xs(title='删除' type='button', ng-click='item.remove()')
-                              span.glyphicon.glyphicon-trash
-                    div
-                      div 上传进度:
-                        .progress(style='')
-                          .progress-bar(role='progressbar', ng-style="{ 'width': uploader.progress + '%' }")
-                      .form-group
-                        label(for="filetype" ) 选择分组
-                        select(class="form-control" ng-model="uploader.queue[0].formData[0].docGroup" ng-disabled="uploader.queue.length==0" ng-options= "group for group in state.docGroup")
-                      .form-group
-                        label(for="timesequence" class="col-sm-2") 时间序列
-                        input(type="checkbox"  class = "form-inline" ng-init="uploader.queue[0].formData.push({sequence:false})" ng-model="uploader.queue[0].formData[0].sequence" ng-disabled="uploader.queue.length==0")
-                      button.btn.btn-success.btn-s(type='button', ng-click='uploader.uploadAll()', ng-disabled='!uploader.getNotUploadedItems().length ||uploader.queue[0].formData[0].filetype=="none"')
-                        span.glyphicon.glyphicon-upload
-                        |  上传
-                      button.btn.btn-warning.btn-s(type='button', ng-click='uploader.cancelAll()', ng-disabled='!uploader.isUploading')
-                        span.glyphicon.glyphicon-ban-circle
-                        |  取消
-                      button.btn.btn-danger.btn-s(type='button', ng-click='uploader.clearQueue()', ng-disabled='!uploader.queue.length')
-                        span.glyphicon.glyphicon-trash
-                        |  删除  
-        //- .row-fluid
-        //-   .col-md-1.col-md-offset-8
-        //-     btn.btn.btn-danger(ng-click="uploadToggle()") 收起
-
+      .btn-toolbar(role="toolbar")
+        .btn-group
+          a.btn.btn-sm.btn-default(href="#" ng-click="filterToggle()" )
+            span.fa.fa-filter
+              |筛选 
+          a.btn.btn-sm.btn-default(href="#" ng-click="filterToggle()")
+            span.fa.fa-database
+              |保存
+          a.btn.btn-sm.btn-default(href="#" ng-csv="state.results|filter:{'selected':true}" filename="export_data.csv" field-separator="," decimal-separator=".")
+            span.fa.fa-save
+              |导出
+          a.btn.btn-sm.btn-default(href="#" ng-click="selectAll()")
+            span.fa(ng-class="{'fa-check-square-o':state.selectAll,'fa-square-o':!state.selectAll}")
+              |{{state.selectAll?"不选":"全选"}}
+          a.btn.btn-sm.btn-default(href="#" ng-click="state.showMapView=!state.showMapView")
+            span.fa.fa-globe
+              |地图
+          a.btn.btn-sm.btn-default(href="#" ng-click="collapseEdit()" title="收放编辑视图")
+            span.fa.fa-indent
+              |隐藏
+      div(filter-form ng-show="state.filterChecked")
+      div(filter-result)
+      #upload-modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myLargeModalLabel', aria-hidden='true')
+        .modal-dialog.modal-lg
+          .modal-content
+            .modal-header
+              button.close(type='button', data-dismiss='modal')
+                span(aria-hidden='true') &times;
+                span.sr-only Close
+              h4#myLargeModalLabel.modal-title 上传文档         
+            .modal-body
+              div.container
+                #fileupload(nv-file-drop='', uploader='uploader', filters='queueLimit, customFilter')
+                  .row-fluid
+                    .col-md-10
+                      div(ng-show='uploader.isHTML5') 
+                        .well.my-drop-zone(nv-file-over='', uploader='uploader')
+                          input(type='file', nv-file-select='', uploader='uploader')
+                          h4.text-center 拖放文件到此处
+                  .row-fluid
+                    .col-md-10(style='margin-bottom: 40px')
+                              table.table
+                                thead
+                                  tr
+                                    th(width='40%') 文件              
+                                    th(ng-show='uploader.isHTML5') 大小
+                                    th 状态                                 
+                                    th 操作
+                                tbody
+                                  tr(ng-repeat='item in uploader.queue')
+                                    td
+                                      strong {{ item.file.name }}
+                                    td(ng-show='uploader.isHTML5', nowrap='') {{ item.file.size/1024/1024|number:2 }} MB
+                                    td.text-center
+                                      span(ng-show='item.isSuccess')
+                                        i.glyphicon.glyphicon-ok
+                                      span(ng-show='item.isCancel')
+                                        i.glyphicon.glyphicon-ban-circle
+                                      span(ng-show='item.isError')
+                                        i.glyphicon.glyphicon-remove
+                                    td(nowrap='')
+                                      button.btn.btn-success.btn-xs(title='上传' type='button', ng-click='item.upload()', ng-disabled='item.isReady || item.isUploading || item.isSuccess')
+                                        span.glyphicon.glyphicon-upload
+                                      button.btn.btn-warning.btn-xs(title='取消' type='button', ng-click='item.cancel()', ng-disabled='!item.isUploading')
+                                        span.glyphicon.glyphicon-ban-circle
+                                      button.btn.btn-danger.btn-xs(title='删除' type='button', ng-click='item.remove()')
+                                        span.glyphicon.glyphicon-trash
+                              div
+                                div 上传进度:
+                                  .progress(style='')
+                                    .progress-bar(role='progressbar', ng-style="{ 'width': uploader.progress + '%' }")
+                                .form-group
+                                  label(for="filetype" ) 选择分组        
+                                  select(class="form-control" ng-model="uploader.queue[0].formData[0].docGroup" ng-disabled="uploader.queue.length==0" ng-options= "group for group in state.groupOptions" ng-init="initGroup()")
+                                .form-group
+                                  label(for="timesequence" class="col-sm-2") 时间序列
+                                  input(type="checkbox"  class = "form-inline" ng-init="uploader.queue[0].formData.push({sequence:false})" ng-model="uploader.queue[0].formData[0].sequence" ng-disabled="uploader.queue.length==0")
+                                .btn-group
+                                  button.btn.btn-success.btn-s(type='button', ng-click='uploader.uploadAll()', ng-disabled='!uploader.getNotUploadedItems().length ||uploader.queue[0].formData[0].filetype=="none"')
+                                    span.glyphicon.glyphicon-upload
+                                    |  上传
+                                  button.btn.btn-warning.btn-s(type='button', ng-click='uploader.cancelAll()', ng-disabled='!uploader.isUploading')
+                                    span.glyphicon.glyphicon-ban-circle
+                                    |  取消
+                                  button.btn.btn-danger.btn-s(type='button', ng-click='uploader.clearQueue()', ng-disabled='!uploader.queue.length')
+                                    span.glyphicon.glyphicon-trash
+                                    |  删除  
 script(type="text/ng-template" id="filter.html")
-  h6.text-center 添加抽取条件
-  form.form-horizontal(role='form')
+  form.form-horizontal.filterForm(role='form')
     #root.form-group 
       .col-sm-10.col-sm-offset-1  
-        input.form-control(placeholder='例:"湖南+污染/湘江/水库-严重' id="" ng-model="state.rootKeyWord"  title="'+'表示且,'-'表示非,'/'表示或")
-      //- btn#addfilter.btn.btn-default.btn-success(ng-click="extract()")
-      //-   span.fa.fa-search
-      //-     | 抽取
-
+        input.form-control(placeholder='筛选,例:"湖南+污染/湘江/水库-严重' id="" ng-model="state.rootKeyWord"  title="'+'表示且,'-'表示非,'/'表示或")
 script(type="text/ng-template",id = "filter-result.html")
   ul.list-group
-    li.list-group-item(ng-repeat="result in state.results | filter :extract")
-     h4.text-primary 时间：{{result.TIME}}
-     h4.text-primary 地点：{{result.LOC}}
-     h4.text-warning 经纬度：{{result.LNG}},{{result.LAT}}
-     div
-       h4(style = "float:left") 内容：
-       h4(style = "padding-left:40px") {{result.CONTENT}}
+    li.list-group-item(ng-repeat="result in state.results | filter:extract")
+     input(type="checkbox"  class = "form-inline" ng-model="result.selected" style="height:18px")
+     div(style="margin-top:-32px;margin-left:18px")
+       h4.text-primary 时间：{{result.TIME}}
+       h4.text-primary 地点：{{result.LOC}}
+       h4.text-warning 经纬度：{{result.LNG|number:3}},{{result.LAT|number:3}}
+       div
+         h4.text-success 内容：
+         h4(style = "margin-left:50px;margin-top:-28px") {{result.CONTENT}}
 
 script(type="text/ng-template" id="mapview.html")
   #sidebar.sidebar.collapsed
@@ -254,14 +253,21 @@ script(type="text/ng-template" id="mapview.html")
         h2.sidebar-header 文档
           span.sidebar-close
             i.fa.fa-caret-right
-        //- abn-tree(conte-menu="state.leftmenuOptions" tree-data = "state.my_treedata" tree-control= "my_tree" icon-leaf="fa fa-file-text-o" icon-expand="fa fa-chevron-right" icon-collapse="fa fa-chevron-down"  expand-level="0" on-select="my_tree_handler(branch)" ng-init="state.my_treedata="+userTreeData)
-
+        treecontrol(class="tree-classic" tree-model="state.my_treedata" options="state.tree_options" expanded-nodes="state.expanded_nodes" on-selection="my_tree_handler(node)" selected-node="state.selectedNode" ng-init="state.my_treedata="+userTreeData) {{node.label}}
       #events.sidebar-pane
         h2.sidebar-header 事件
           span.sidebar-close
             i.fa.fa-caret-right
-        //- div(filter-form)
-        //- div(filter-result)
+        .btn-toolbar(role="toolbar" style="margin-top:5px")
+          .btn-group
+            a.btn.btn-xs.btn-default(href="#" ng-csv="state.results|filter:{'selected':true}" filename="export_data.csv" field-separator="," decimal-separator=".")
+              span.fa.fa-save
+                |导出
+            a.btn.btn-xs.btn-default(href="#" ng-click="selectAll()")
+              span.fa(ng-class="{'fa-check-square-o':state.selectAll,'fa-square-o':!state.selectAll}")
+                |{{state.selectAll?"不选":"全选"}}
+        div(filter-form)
+        div(filter-result)
       #setting.sidebar-pane
         h2.sidebar-header 设置
           span.sidebar-close

@@ -1,9 +1,9 @@
 'use strict';
 angular
-	.module('myApp', ["ng-dragable-div", "angularFileUpload", 'frapontillo.bootstrap-switch', "angularBootstrapNavTree", "pageslide-directive", "ngScrollbars", "ui.bootstrap.contextMenu", "toggle-switch", "treeControl"])
+	.module('myApp', ["ng-dragable-div", "angularFileUpload", 'frapontillo.bootstrap-switch', "angularBootstrapNavTree", "pageslide-directive", "ngScrollbars", "ui.bootstrap.contextMenu", "toggle-switch", "treeControl", 'ngSanitize', 'ngCsv','ui-notification'])
 	.service("httpService", ["$http", function(http) {
 		var groupObj = {};
-		var watchedgeoinfo = {};
+		var watchedgeoinfo = [];
 		var getGroup = function() {
 			return http.get('/user/mygroup')
 				.success(function(data) {
@@ -38,7 +38,6 @@ angular
 				})
 		}
 
-
 		var extract = function(filter, docid) {
 			return http.post('/edit/extract', {
 					"filter": filter,
@@ -64,8 +63,6 @@ angular
 					console.log(data)
 				})
 
-			// watchedgeoinfo=[{"lat": 24.886083, "image_url": "http://127.0.0.1:3000/img/kunming.jpg", "lon": 102.839608, "location": "昆明", "thumb": "http://127.0.0.1:3000/thumb/kunming.jpg"}, {"lat": 22.015601, "image_url": "http://127.0.0.1:3000/img/banna.jpg", "lon": 100.803477, "location": "版纳", "thumb": "http://127.0.0.1:3000/thumb/banna.jpg"}, {"lat": 22.175626, "image_url": "http://127.0.0.1:3000/img/yexianggu.jpg", "lon": 100.865759, "location": "野象谷", "thumb": "http://127.0.0.1:3000/thumb/yexianggu.jpg"}, {"lat": 21.857003, "image_url": "http://127.0.0.1:3000/img/daizucunzhai.jpg", "lon": 100.956585, "location": "傣族村寨", "thumb": "http://127.0.0.1:3000/thumb/daizucunzhai.jpg"}, {"lat": 22.033046, "image_url": "http://127.0.0.1:3000/img/yuanshisenlingongyuan.jpg", "lon": 100.881258, "location": "原始森林公园", "thumb": "http://127.0.0.1:3000/thumb/yuanshisenlingongyuan.jpg"}, {"lat": 26.882759, "image_url": "http://127.0.0.1:3000/img/lijiang.jpg", "lon": 100.234432, "location": "丽江", "thumb": "http://127.0.0.1:3000/thumb/lijiang.jpg"}, {"lat": 27.034013, "image_url": "http://127.0.0.1:3000/img/yulongxueshan.jpg", "lon": 100.270093, "location": "玉龙雪山", "thumb": "http://127.0.0.1:3000/thumb/yulongxueshan.jpg"}, {"lat": 26.98274, "image_url": "http://127.0.0.1:3000/img/bingchuandasuodao.jpg", "lon": 100.205666, "location": "冰川大索道", "thumb": "http://127.0.0.1:3000/thumb/bingchuandasuodao.jpg"}, {"lat": 27.131623, "image_url": "http://127.0.0.1:3000/img/lanyuegu.jpg", "lon": 100.251243, "location": "蓝月谷", "thumb": "http://127.0.0.1:3000/thumb/lanyuegu.jpg"}, {"lat": 27.012612, "image_url": "http://127.0.0.1:3000/img/dongbagu.jpg", "lon": 100.267728, "location": "东巴谷", "thumb": "http://127.0.0.1:3000/thumb/dongbagu.jpg"}, {"lat": 25.916365, "image_url": "http://127.0.0.1:3000/img/shuanglang.jpg", "lon": 100.200271, "location": "双廊", "thumb": "http://127.0.0.1:3000/thumb/shuanglang.jpg"}, {"lat": 25.69349, "image_url": "http://127.0.0.1:3000/img/daligucheng.jpg", "lon": 100.170377, "location": "大理古城", "thumb": "http://127.0.0.1:3000/thumb/daligucheng.jpg"}, {"lat": 25.612056, "image_url": "http://127.0.0.1:3000/img/dali.jpg", "lon": 100.27451, "location": "大理", "thumb": "http://127.0.0.1:3000/thumb/dali.jpg"}, {"lat": 25.697499, "image_url": "http://127.0.0.1:3000/img/baizuminju.jpg", "lon": 100.266166, "location": "白族民居", "thumb": "http://127.0.0.1:3000/thumb/baizuminju.jpg"}, {"lat": 25.711798, "image_url": "http://127.0.0.1:3000/img/chongshengsisanta.jpg", "lon": 100.155887, "location": "崇圣寺三塔", "thumb": "http://127.0.0.1:3000/thumb/chongshengsisanta.jpg"}, {"lat": 24.92558, "image_url": "http://127.0.0.1:3000/img/anning.jpg", "lon": 102.484553, "location": "安宁", "thumb": "http://127.0.0.1:3000/thumb/anning.jpg"}, {"lat": 24.823049, "image_url": "http://127.0.0.1:3000/img/shilin.jpg", "lon": 103.332585, "location": "石林", "thumb": "http://127.0.0.1:3000/thumb/shilin.jpg"}]
-
 		}
 		var getPath = function() {
 			return http.get('/edit/path')
@@ -75,9 +72,6 @@ angular
 				.error(function(data) {
 					console.log(data)
 				})
-
-			// watchedgeoinfo=[{"lat": 24.886083, "image_url": "http://127.0.0.1:3000/img/kunming.jpg", "lon": 102.839608, "location": "昆明", "thumb": "http://127.0.0.1:3000/thumb/kunming.jpg"}, {"lat": 22.015601, "image_url": "http://127.0.0.1:3000/img/banna.jpg", "lon": 100.803477, "location": "版纳", "thumb": "http://127.0.0.1:3000/thumb/banna.jpg"}, {"lat": 22.175626, "image_url": "http://127.0.0.1:3000/img/yexianggu.jpg", "lon": 100.865759, "location": "野象谷", "thumb": "http://127.0.0.1:3000/thumb/yexianggu.jpg"}, {"lat": 21.857003, "image_url": "http://127.0.0.1:3000/img/daizucunzhai.jpg", "lon": 100.956585, "location": "傣族村寨", "thumb": "http://127.0.0.1:3000/thumb/daizucunzhai.jpg"}, {"lat": 22.033046, "image_url": "http://127.0.0.1:3000/img/yuanshisenlingongyuan.jpg", "lon": 100.881258, "location": "原始森林公园", "thumb": "http://127.0.0.1:3000/thumb/yuanshisenlingongyuan.jpg"}, {"lat": 26.882759, "image_url": "http://127.0.0.1:3000/img/lijiang.jpg", "lon": 100.234432, "location": "丽江", "thumb": "http://127.0.0.1:3000/thumb/lijiang.jpg"}, {"lat": 27.034013, "image_url": "http://127.0.0.1:3000/img/yulongxueshan.jpg", "lon": 100.270093, "location": "玉龙雪山", "thumb": "http://127.0.0.1:3000/thumb/yulongxueshan.jpg"}, {"lat": 26.98274, "image_url": "http://127.0.0.1:3000/img/bingchuandasuodao.jpg", "lon": 100.205666, "location": "冰川大索道", "thumb": "http://127.0.0.1:3000/thumb/bingchuandasuodao.jpg"}, {"lat": 27.131623, "image_url": "http://127.0.0.1:3000/img/lanyuegu.jpg", "lon": 100.251243, "location": "蓝月谷", "thumb": "http://127.0.0.1:3000/thumb/lanyuegu.jpg"}, {"lat": 27.012612, "image_url": "http://127.0.0.1:3000/img/dongbagu.jpg", "lon": 100.267728, "location": "东巴谷", "thumb": "http://127.0.0.1:3000/thumb/dongbagu.jpg"}, {"lat": 25.916365, "image_url": "http://127.0.0.1:3000/img/shuanglang.jpg", "lon": 100.200271, "location": "双廊", "thumb": "http://127.0.0.1:3000/thumb/shuanglang.jpg"}, {"lat": 25.69349, "image_url": "http://127.0.0.1:3000/img/daligucheng.jpg", "lon": 100.170377, "location": "大理古城", "thumb": "http://127.0.0.1:3000/thumb/daligucheng.jpg"}, {"lat": 25.612056, "image_url": "http://127.0.0.1:3000/img/dali.jpg", "lon": 100.27451, "location": "大理", "thumb": "http://127.0.0.1:3000/thumb/dali.jpg"}, {"lat": 25.697499, "image_url": "http://127.0.0.1:3000/img/baizuminju.jpg", "lon": 100.266166, "location": "白族民居", "thumb": "http://127.0.0.1:3000/thumb/baizuminju.jpg"}, {"lat": 25.711798, "image_url": "http://127.0.0.1:3000/img/chongshengsisanta.jpg", "lon": 100.155887, "location": "崇圣寺三塔", "thumb": "http://127.0.0.1:3000/thumb/chongshengsisanta.jpg"}, {"lat": 24.92558, "image_url": "http://127.0.0.1:3000/img/anning.jpg", "lon": 102.484553, "location": "安宁", "thumb": "http://127.0.0.1:3000/thumb/anning.jpg"}, {"lat": 24.823049, "image_url": "http://127.0.0.1:3000/img/shilin.jpg", "lon": 103.332585, "location": "石林", "thumb": "http://127.0.0.1:3000/thumb/shilin.jpg"}]
-
 		}
 
 		var devidePara = function(docid, str) {
@@ -104,9 +98,7 @@ angular
 				.error(function(data) {
 					console.log(data)
 				})
-
 		}
-
 		return {
 			"getGroup": getGroup,
 			"postGroup": postGroup,
@@ -136,7 +128,7 @@ angular
 			replace: false,
 		}
 	})
-	.controller('edit', ["$scope", "FileUploader", "httpService", "$window", function(scope, FileUploader, httpService, $window) {
+	.controller('edit', ["$scope", "FileUploader", "httpService", "$window", "$filter", function(scope, FileUploader, httpService, $window, $filter) {
 		var uploader = scope.uploader = new FileUploader({
 			url: '/fileUpload'
 		});
@@ -163,32 +155,37 @@ angular
 			}
 		});
 
-		scope.my_tree = {}
-
 		uploader.onCompleteItem = function(fileItem, response, status, headers) {
 
 			httpService.postGroup("").success(function(data) {
 				scope.state.my_treedata = data;
 				console.log(scope.my_treedata)
-				//自动展开
-				scope.state.expanded_nodes=(function(arr){var temp=[];for(var i =0;i<arr.length;i++){
-					temp.push(arr[i])
-				}return temp})(data)
-	
+					//自动展开
+				scope.state.expanded_nodes = (function(arr) {
+					var temp = [];
+					for (var i = 0; i < arr.length; i++) {
+						temp.push(arr[i])
+					}
+					return temp
+				})(data)
+
 				//自动打开刚刚上传的文档
 				// response中包含文档信息
-				scope.state.selectedNode=scope.state.my_treedata[response[0]]["children"][response[1]]
+				scope.state.selectedNode = scope.state.my_treedata[response[0]]["children"][response[1]]
 				scope.my_tree_handler(scope.state.selectedNode)
-				scope.uploadToggle()
-				
+				angular.element('#uploadModal').modal('hide')
+
 			})
 
 		};
+		uploader.onAfterAddingFile=function(fileItem){
+			console.log(scope.uploader.queue[0])			
+			scope.uploader.queue[0].formData.push({docGroup:scope.state.groupOptions[scope.state.groupOptions.length-1]})
+		}
 
 		scope.state = {
-			"currentview": "文档视图",
-			"showdocview": true,
-			"nextview": "地图视图",
+			
+			"showMapView": false,
 			"isContentCollapsed": false,
 			"uploadChecked": false,
 			"filterChecked": false,
@@ -217,17 +214,7 @@ angular
 					labelSelected: "a8"
 				}
 			},
-			"expanded_nodes":[],
-			"scrollbarconfig": {
-				autoHideScrollbar: false,
-				theme: 'light',
-				axis: "y",
-				advanced: {
-					updateOnContentResize: true
-				},
-				setHeight: 600,
-				scrollInertia: 0
-			},
+			"expanded_nodes": [],
 			"dictionary": {
 				LAT: "经度",
 				LNG: "纬度",
@@ -267,8 +254,6 @@ angular
 							function(newhtml) {
 								angular.element('#docContent').html(newhtml)
 							})
-
-
 
 						//post selection part
 					},
@@ -310,56 +295,18 @@ angular
 			]
 		}
 
-		scope.my_treedata = [{
-				"label": "默认分组",
-				"children": [{
-					"label": "首例寨卡.txt",
-					"docid": "586200e2e2c43c2c430a5b38"
-				}, {
-					"label": "首例寨卡.txt",
-					"docid": "586200fce2c43c2c430a5b39"
-				}, {
-					"label": "首例寨卡.txt",
-					"docid": "586201a6e2c43c2c430a5b3a"
-				}, {
-					"label": "首例寨卡.txt",
-					"docid": "586201dae2c43c2c430a5b3b"
-				}, {
-					"label": "首例寨卡.txt",
-					"docid": "58620251e2c43c2c430a5b3c"
-				}]
-			}] //[      {        label: 'North America',        children: [          {            label: 'Canada',            children: ['Toronto', 'Vancouver']          }, {            label: 'USA',            children: ['New York', 'Los Angeles']          }, {            label: 'Mexico',            children: ['Mexico City', 'Guadalajara']          }        ]      }, {        label: 'South America',        children: [          {            label: 'Venezuela',            children: ['Caracas', 'Maracaibo']          }, {            label: 'Brazil',            children: ['Sao Paulo', 'Rio de Janeiro']          }, {            label: 'Argentina',            children: ['Buenos Aires', 'Cordoba']          }        ]      }    ],
+		scope.my_treedata = [] 
 		scope.my_tree_handler = function(branch) {
 				if (branch.docid) {
 					scope.state.selectedDocId = branch.docid
 					httpService.getDoc(branch.docid).success(function(html) {
-						// angular.element('#docContent div.mCSB_container').html(html.html)
-						angular.element('#docContent').html(html.html)
-							// scope.state.scrollbarconfig = {
-							// 	autoHideScrollbar: true,
-							// 	theme: 'dark',
-							// 	axis: "y",
-							// 	advanced: {
-							// 		updateOnContentResize: true
-							// 	},
-							// 	setHeight: angular.element("#doc").height(),
-							// 	scrollInertia: 0
-							// }
+						angular.element('#docContent').html(html.html)	
 						httpService.geoinfo(branch.docid)
 
 					})
 				}
 			}
-			//点击地图视图文件列表事件触发函数
-			// scope.my_tree_handler_map = function(branch) {
-			// 	if (branch.docid) {
-			// 		scope.state.selectedDocId = branch.docid
-			// 		httpService.geoinfo(branch.docid)
-
-		// 	}
-		// }
-
-
+			
 		scope.submitAddnewGroup = function() {
 			httpService.postGroup(scope.state.newGroupName).success(function(data) {
 				scope.state.my_treedata = data;
@@ -374,28 +321,31 @@ angular
 		scope.hideAddGroupInput = function() {
 			scope.state.showAddGroupInput = false
 		}
-		scope.changeView = function() {
-			var temp = scope.state.currentview;
-			scope.state.currentview = scope.state.nextview;
-			scope.state.nextview = temp;
-			scope.state.showdocview = !scope.state.showdocview
-		}
 		scope.collapseContent = function() {
 			scope.$broadcast("collapseContent")
 		}
 		scope.collapseEdit = function() {
 			scope.$broadcast("collapseEdit")
 		}
-		scope.uploadToggle = function() {
-			scope.state.uploadChecked = !scope.state.uploadChecked
+		scope.initGroup = function() {
+			
 			httpService.getGroup().success(function(data) {
-				scope.state.docGroup = data;
+				scope.state.groupOptions = data;
 			});
+			
 		}
 		scope.filterToggle = function() {
 			scope.state.filterChecked = !scope.state.filterChecked
 		}
+		scope.selectAll = function() {
+			scope.state.selectAll = !scope.state.selectAll
+			var filteredResult= $filter('filter')(scope.state.results, scope.extract, true)
+			console.log(filteredResult)
+			filteredResult.map(function(item) {
+				item.selected = scope.state.selectAll
 
+			})
+		}
 		scope.closeTimeLine = function() {
 			scope.state.showTimeLine = false;
 		}
@@ -405,14 +355,11 @@ angular
 		})
 
 		scope.extract = function(event) {
+			// 条件 筛选函数 
 			var queryString = scope.state.rootKeyWord
-
 			if (queryString == "") {
 				return true
 			}
-			// else{
-			// 	return JSON.stringify(event).indexOf("湖南")!=-1
-			// }
 			else {
 				var queryFilters = queryString.replace(/[+-\/]/g, "###$&").split("###")
 				var filter = [{
@@ -443,7 +390,9 @@ angular
 				}
 				var _filterResult = JSON.stringify(event).indexOf(filter[0].keyword) != -1
 				if (!additionalFilter) {
-					console.log(filter.keyword)
+
+					// 场景：全选状态下，条件改变时，将不再符合的结果取消选中
+					if(!_filterResult){event.selected=false;}
 					return _filterResult
 				} else {
 					for (var i = 0; i < additionalFilter.length; i++) {
@@ -464,6 +413,7 @@ angular
 					}
 
 				}
+				if(!_filterResult){event.selected=false;}
 				return _filterResult;
 			}
 		}
@@ -502,7 +452,7 @@ angular
 					scope.state.isContentCollapsed = !scope.state.isContentCollapsed
 				})
 				scope.$on("collapseEdit", function() {
-					if (scope.state.isContentCollapsed) {
+					if (scope.state.isContentCollapsed) { //
 						if (scope.state.isEditCollapsed) {
 							instance.setSizes([16, 42, 42])
 							instance.collapse(0)
@@ -760,6 +710,7 @@ angular
 					}
 
 				});
+				
 				scope.$on("e_tl_selected", function(e, d) {
 					scope.state.ShowAllPoints = false;
 					scope.state.showGalley = true

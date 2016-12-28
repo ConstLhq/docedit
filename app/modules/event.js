@@ -35,6 +35,7 @@ Event.prototype = {
 			tc = null,
 			TAG_LOC_BEGIN = "<Location",
 			TAG_TIME_BEGIN = "<time",
+			TAG_TIME_END = "</time>",
 			s,
 			e,
 			objs,
@@ -62,7 +63,7 @@ Event.prototype = {
 				str = subs[0];
 			}
 			s = str.indexOf(TAG_TIME_BEGIN); //<time
-			str = str.replace(/，/g, ',').replace(",",",<break>");
+			str = str.replace(/，/g, ',').replace(/,/g, ",<break>");
 			var toks = str.split("<break>")
 			if (s == -1) {
 				// 该句继承上句的时间
@@ -78,8 +79,20 @@ Event.prototype = {
 				var vs = []
 				splits.push(vs);
 				var addNew = false;
-				toks.forEach(function(t) {
+				toks.forEach(function(t,index,array) {
 					if ((s = t.indexOf(TAG_TIME_BEGIN)) != -1) {
+						
+						e=t.indexOf(TAG_TIME_END,s + TAG_TIME_BEGIN.length)
+						if (e != -1 && e + TAG_TIME_END.length == t.length - 1 && t[t.length-1]==",")
+						{
+							// splits.get(splits.size() - 1).add(t);
+							// 此句应与后续句子合为一句
+							if (index + 1 < array.length)
+							{
+								toks[index + 1] = toks[index] + toks[index + 1];
+							}
+						}else{
+
 						tc = new TimeContext(t.substring(s));
 						times.push(tc);
 						if (addNew == false) {
@@ -90,6 +103,7 @@ Event.prototype = {
 							splits.push(vs);
 							splits[splits.length - 1].push(t);
 						}
+					}
 					} else
 						splits[splits.length - 1].push(t);
 				})

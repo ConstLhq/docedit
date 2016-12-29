@@ -86,11 +86,11 @@ script(type="text/ng-template" id="editnav.html")
           i(ng-click="collapseContent()" ng-class="{'fa fa-outdent':!state.isContentCollapsed,'fa fa-indent':state.isContentCollapsed}" title="目录")
       .collapse.navbar-collapse
         form.navbar-form.navbar-left(role='search')
-          .form-group
-            input.form-control(type='text', placeholder='Search' disabled)
-            button.btn.btn-default(type='submit' disabled) 
-              i.fa.fa-search
-              | 搜文档
+          md-autocomplete(md-selected-item="state.selectedNode" md-search-text="searchText" md-items="item in getMatchesDoc(searchText)" md-item-text="item.label" md-selected-item-change="selectDocChange()" placeholder="搜索文档...")
+            md-item-template
+              span(md-highlight-text="searchText") {{item.label}}
+            md-not-found 无匹配文档.
+            
         -if (user)
          p.navbar-text.navbar-right
           span 欢迎您,#{user.name}
@@ -118,15 +118,16 @@ script(type="text/ng-template" id="docview.html")
             span.fa.fa-outdent
               |隐藏
       div(ng-show="state.showAddGroupInput" style="margin-top:5px")
-        form.form-horizontal(role='form',name="newgroupform")
+        form.form-horizontal(role='form',name="newgroupform"  novalidate)
           .form-group.form-group-sm
             .col-sm-7.col-sm-offset-1
-              input.form-control.input-sm#newgroupinput(placeholder="输入新建分组名" type="text" ng-model="state.newGroupName")
+              input.form-control.input-sm#newgroupinput(placeholder="输入新建分组名" type="text" ng-model="state.newGroupName" name ="newgroupname" grpnamevalid)
+              span.text-warning(ng-show="newgroupform.newgroupname.$error.grpnamevalid") 组名已经存在！
             .col-sm-4
               .btn-group
-                a.btn.btn-default.btn-sm.btn.btn-success(role="button" ng-click="submitAddnewGroup()") 好
+                a.btn.btn-default.btn-sm.btn.btn-success(role="button" ng-click="submitAddnewGroup()" ng-disabled="newgroupform.newgroupname.$error.grpnamevalid") 好
                 a.btn.btn-default.btn-sm.btn-warning(role="button" ng-click="hideAddGroupInput()") 否
-      treecontrol(class="tree-classic" tree-model="state.my_treedata" options="state.tree_options" expanded-nodes="state.expanded_nodes" on-selection="my_tree_handler(node)" selected-node="state.selectedNode" ng-init="state.my_treedata="+userTreeData) {{node.label}}
+      treecontrol(context-menus="leftmenuOptions(node)" class="tree-classic" tree-model="state.my_treedata" options="state.tree_options" expanded-nodes="state.expanded_nodes" on-selection="my_tree_handler(node)" selected-node="state.selectedNode" ng-init="state.my_treedata="+userTreeData) {{node.label}}{{node.children? "("+node.children.length+")":""}}
     #doc.split.split-horizontal
       #docContent(context-menu="state.middlemenuOptions")
         h3 尚未选择文档
@@ -176,13 +177,13 @@ script(type="text/ng-template" id="docview.html")
                                 thead
                                   tr
                                     th(width='20%') 
-                                      h5.text-center 文件              
-                                    th(ng-show='uploader.isHTML5')
-                                      h5.text-center 大小
+                                      h5.text-center 文件名              
                                     th
                                       h5.text-center 类型
                                     th 
                                       h5.text-center 分组
+                                    th
+                                      h5.text-center 文档日期
                                     th 
                                       h5.text-center 状态                                 
                                     th 
@@ -193,16 +194,19 @@ script(type="text/ng-template" id="docview.html")
                                     td
                                       h5 {{ item.file.name }}
                                     //- 大小
-                                    td(ng-show='uploader.isHTML5', nowrap='')
-                                      h5 {{ item.file.size/1024/1024|number:2 }} MB
+                                    //- td(ng-show='uploader.isHTML5', nowrap='')
+                                    //-   h5 {{ item.file.size/1024/1024|number:2 }} MB
                                     //-类型
                                     td
                                       select(class="form-control" ng-model="item.formData[0].docType" ng-init="item.formData[0].docType='news'")
-                                        each item in [{key:"新闻",value:"news"},{key:"叙述",value:"narrative"}]
+                                        each item in [{key:"新闻",value:"news"},{key:"叙事",value:"nars"},{key:"口语",value:"nars"},{key:"科学",value:"sci"}]
                                           option(value=item.value)=item.key
                                     //-分组
                                     td
                                       select(class="form-control" ng-model="item.formData[0].docGroup" ng-options= "group for group in state.groupOptions")
+                                    //-时间
+                                    td
+                                      md-datepicker(ng-model="item.formData[0].docDate" md-placeholder="日期" ng-init="initDate(item.formData[0])")
                                     //-操作
                                     td.text-center
                                       span(ng-show='item.isSuccess')

@@ -26,4 +26,6 @@ router.post("/edit/extract",Index.extract)
 router.get("/edit/path",Index.path)
 router.post("/edit/devide",uploadController.devide)
 router.post("/edit/reparse",uploadController.reparse)
+router.get("/edit/downloadfile/:docid",uploadController.downloadFile)
+
 module.exports = router;

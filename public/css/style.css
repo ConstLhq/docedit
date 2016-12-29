@@ -241,3 +241,20 @@ p{
 .filterForm{
   margin :5px 0px;
 }
+.md-pane-open{
+  z-index: 1051 !important;
+}
+
+md-autocomplete{
+  height: 32px !important;
+}
+md-autocomplete md-autocomplete-wrap{
+  height: 32px;
+  
+}
+#input-0{
+  height: 32px;
+}
+.md-autocomplete-suggestions{
+  height: 32px;
+}

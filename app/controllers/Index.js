@@ -16,13 +16,14 @@ exports.edit = function(req, res) {
         .exec(function(err, exec_user) {
             // console.log(exec_user.group.groupFile)
             var treedata = new Array()
-            exec_user.group.forEach(function(_group) {
+            exec_user.group.forEach(function(_group,gr) {
                 treedata.push({
                     label: _group.groupName,
-                    children: _group.groupFile.map(function(obj) {
+                    children: _group.groupFile.map(function(obj,tu) {
                         var child = new Object()
                         child.label = obj.originalName
                         child.docid = obj._id
+                        child.grtu=[gr,tu]
                         return child
                     })
                 })

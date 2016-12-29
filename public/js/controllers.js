@@ -1,6 +1,7 @@
+//"ui.bootstrap.contextMenu",
 'use strict';
 angular
-	.module('myApp', ["ng-dragable-div", "angularFileUpload", 'frapontillo.bootstrap-switch', "angularBootstrapNavTree", "pageslide-directive", "ngScrollbars", "ui.bootstrap.contextMenu", "toggle-switch", "treeControl", 'ngSanitize', 'ngCsv','ui-notification'])
+	.module('myApp', ["ng-dragable-div", "angularFileUpload", 'frapontillo.bootstrap-switch', "angularBootstrapNavTree", "pageslide-directive", "ngScrollbars", "toggle-switch", "treeControl", 'ngSanitize', 'ngCsv', 'ui-notification', 'ngMaterial', 'ngMessages'])
 	.service("httpService", ["$http", function(http) {
 		var groupObj = {};
 		var watchedgeoinfo = [];
@@ -99,6 +100,18 @@ angular
 					console.log(data)
 				})
 		}
+
+		var downloadFile = function(docid){
+			return http.get('/edit/downloadfile/'+docid)
+				.success(function(file) {
+					return file
+				})
+				.error(function(data) {
+					console.log(data)
+				})
+
+		}
+
 		return {
 			"getGroup": getGroup,
 			"postGroup": postGroup,
@@ -111,6 +124,7 @@ angular
 			"getPath": getPath,
 			"devidePara": devidePara,
 			"reparse": reparse,
+			"downloadFile":downloadFile
 		}
 	}])
 	.controller('index', ['$scope', function(scope) {}])
@@ -151,7 +165,7 @@ angular
 		uploader.filters.push({
 			name: 'customFilter',
 			fn: function(item, options) {
-				return this.queue.length < 2;
+				return this.queue.length < 5;
 			}
 		});
 
@@ -161,13 +175,14 @@ angular
 				scope.state.my_treedata = data;
 				console.log(scope.my_treedata)
 					//自动展开
-				scope.state.expanded_nodes = (function(arr) {
-					var temp = [];
-					for (var i = 0; i < arr.length; i++) {
-						temp.push(arr[i])
-					}
-					return temp
-				})(data)
+				scope.state.expanded_nodes = data
+					//  (function(arr) {
+					// 	var temp = [];
+					// 	for (var i = 0; i < arr.length; i++) {
+					// 		temp.push(arr[i])
+					// 	}
+					// 	return temp
+					// })(data)
 
 				//自动打开刚刚上传的文档
 				// response中包含文档信息
@@ -178,13 +193,15 @@ angular
 			})
 
 		};
-		uploader.onAfterAddingFile=function(fileItem){
-			console.log(scope.uploader.queue[0])			
-			scope.uploader.queue[0].formData.push({docGroup:scope.state.groupOptions[scope.state.groupOptions.length-1]})
+		uploader.onAfterAddingFile = function(fileItem) {
+			console.log(scope.uploader.queue[0])
+			scope.uploader.queue[0].formData.push({
+				docGroup: scope.state.groupOptions[scope.state.groupOptions.length - 1]
+			})
 		}
 
 		scope.state = {
-			
+
 			"showMapView": false,
 			"isContentCollapsed": false,
 			"uploadChecked": false,
@@ -212,6 +229,9 @@ angular
 					iLeaf: "a5",
 					label: "a6",
 					labelSelected: "a8"
+				},
+				isLeaf: function(node) {
+					return !node.hasOwnProperty("children")
 				}
 			},
 			"expanded_nodes": [],
@@ -222,27 +242,7 @@ angular
 				CONTENT: "事件"
 			},
 
-			"leftmenuOptions": [
-				['查看', function($itemScope, $event, modelValue, text, $li) {
-					$scope.selected = $itemScope.item.name;
-				}],
-				['下载原文件', function($itemScope, $event, modelValue, text, $li) {
-					$scope.selected = $itemScope.item.name;
-				}],
-				['导出解析json', function($itemScope, $event, modelValue, text, $li) {
-					$scope.selected = $itemScope.item.name;
-				}],
-				['清空解析记录', function($itemScope, $event, modelValue, text, $li) {
-					$scope.selected = $itemScope.item.name;
-				}],
-				['重新解析', function($itemScope, $event, modelValue, text, $li) {
-					$scope.selected = $itemScope.item.name;
 
-				}],
-				['删除文件', function($itemScope, $event, modelValue, text, $li) {
-					$scope.items.splice($itemScope.$index, 1);
-				}]
-			],
 			"middlemenuOptions": [
 				[
 					function($itemScope, $event, modelValue, text) {
@@ -295,26 +295,66 @@ angular
 			]
 		}
 
-		scope.my_treedata = [] 
+		scope.my_treedata = []
 		scope.my_tree_handler = function(branch) {
-				if (branch.docid) {
-					scope.state.selectedDocId = branch.docid
-					httpService.getDoc(branch.docid).success(function(html) {
-						angular.element('#docContent').html(html.html)	
-						httpService.geoinfo(branch.docid)
 
-					})
-				}
+			//记录
+			if (branch.docid) {
+				scope.state.selectedDocId = branch.docid
+				httpService.getDoc(branch.docid).success(function(html) {
+					angular.element('#docContent').html(html.html)
+					httpService.geoinfo(branch.docid)
+
+				})
 			}
-			
-		scope.submitAddnewGroup = function() {
-			httpService.postGroup(scope.state.newGroupName).success(function(data) {
-				scope.state.my_treedata = data;
-				scope.state.newGroupName = "";
-			})
-			scope.state.showAddGroupInput = false
-
 		}
+
+		scope.leftmenuOptions = function(nod) {
+				console.log(nod)
+				if (nod.hasOwnProperty("children")) {
+					return [['删除文件夹', function($itemScope, $event, modelValue, text, $li) {
+							scope.state.selectedNode = nod;
+						}]];
+				} //folder
+				else {
+
+					return [
+
+						['查看', function($itemScope, $event, modelValue, text, $li) {
+							scope.state.selectedNode = nod;
+						}],
+						['下载原文件', function($itemScope, $event, modelValue, text, $li) {
+							// httpService.downloadFile(nod.docid).success(function(file){return file})
+							$window.open('/edit/downloadfile/'+nod.docid)
+						}],
+						['导出解析json', function($itemScope, $event, modelValue, text, $li) {
+							$scope.selected = $itemScope.item.name;
+						}],
+						['清空解析记录', function($itemScope, $event, modelValue, text, $li) {
+							$scope.selected = $itemScope.item.name;
+						}],
+						['重新解析', function($itemScope, $event, modelValue, text, $li) {
+							$scope.selected = $itemScope.item.name;
+
+						}],
+						['删除文件', function($itemScope, $event, modelValue, text, $li) {
+							$scope.items.splice($itemScope.$index, 1);
+						}]
+					]
+
+				}
+
+
+			},
+
+			scope.submitAddnewGroup = function() {
+				httpService.postGroup(scope.state.newGroupName).success(function(data) {
+					scope.state.my_treedata = data;
+					scope.state.newGroupName = "";
+				})
+				scope.state.showAddGroupInput = false
+
+			}
 		scope.showAddGroupInput = function() {
 			scope.state.showAddGroupInput = true
 		}
@@ -328,26 +368,61 @@ angular
 			scope.$broadcast("collapseEdit")
 		}
 		scope.initGroup = function() {
-			
+
 			httpService.getGroup().success(function(data) {
 				scope.state.groupOptions = data;
 			});
-			
+
+		}
+		scope.initDate = function(form) {
+			form.docDate = new Date()
 		}
 		scope.filterToggle = function() {
 			scope.state.filterChecked = !scope.state.filterChecked
 		}
 		scope.selectAll = function() {
-			scope.state.selectAll = !scope.state.selectAll
-			var filteredResult= $filter('filter')(scope.state.results, scope.extract, true)
-			console.log(filteredResult)
-			filteredResult.map(function(item) {
-				item.selected = scope.state.selectAll
+				scope.state.selectAll = !scope.state.selectAll
+				var filteredResult = $filter('filter')(scope.state.results, scope.extract, true)
+					// console.log(filteredResult)
+				filteredResult.map(function(item) {
+					item.selected = scope.state.selectAll
 
-			})
+				})
+			}
+			//搜文档 功能匹配
+		scope.getMatchesDoc = function(searchtext) {
+				console.log(scope.state.my_treedata)
+
+				var candidate = new Array()
+				scope.state.my_treedata.forEach(function(grp, g) {
+					if (grp.hasOwnProperty("children")) {
+						candidate = candidate.concat(grp.children.map(function(doc, t) {
+							return doc
+						}))
+					}
+				})
+				console.log(candidate)
+
+				return $filter('filter')(candidate, function(doc) {
+					return doc.label.indexOf(searchtext) != -1
+				}, true)
+			}
+			// 搜文档 选择回调
+		scope.selectDocChange = function() {
+			//展开文档所在分组
+			if (!scope.state.my_treedata[scope.state.selectedNode.grtu[0]] in scope.state.expanded_nodes) {
+
+				scope.state.expanded_nodes.push(scope.state.my_treedata[scope.state.selectedNode.grtu[0]])
+			}
+			scope.state.selectedNode = scope.state.my_treedata[scope.state.selectedNode.grtu[0]]["children"][scope.state.selectedNode.grtu[1]]
+			scope.my_tree_handler(scope.state.selectedNode)
+
 		}
 		scope.closeTimeLine = function() {
 			scope.state.showTimeLine = false;
+		}
+		scope.test = function() {
+			console.log(scope.node)
 		}
 
 		scope.$watch(httpService.getGeoInfo, function(points) {
@@ -359,8 +434,7 @@ angular
 			var queryString = scope.state.rootKeyWord
 			if (queryString == "") {
 				return true
-			}
-			else {
+			} else {
 				var queryFilters = queryString.replace(/[+-\/]/g, "###$&").split("###")
 				var filter = [{
 					keyword: queryFilters.shift()
@@ -392,7 +466,9 @@ angular
 				if (!additionalFilter) {
 
 					// 场景：全选状态下，条件改变时，将不再符合的结果取消选中
-					if(!_filterResult){event.selected=false;}
+					if (!_filterResult) {
+						event.selected = false;
+					}
 					return _filterResult
 				} else {
 					for (var i = 0; i < additionalFilter.length; i++) {
@@ -413,7 +489,9 @@ angular
 					}
 
 				}
-				if(!_filterResult){event.selected=false;}
+				if (!_filterResult) {
+					event.selected = false;
+				}
 				return _filterResult;
 			}
 		}
@@ -710,7 +788,7 @@ angular
 					}
 
 				});
-				
+
 				scope.$on("e_tl_selected", function(e, d) {
 					scope.state.ShowAllPoints = false;
 					scope.state.showGalley = true
@@ -790,3 +868,32 @@ angular
 
 		}
 	}])
+
+.directive('grpnamevalid', function() {
+	return {
+		require: 'ngModel',
+		link: function(scope, elm, attrs, ctrl) {
+			ctrl.$validators.grpnamevalid = function(modelValue, viewValue) {
+				if (ctrl.$isEmpty(modelValue)) {
+
+					return true;
+				}
+				var validflag = true
+				for (var i = scope.state.my_treedata.length - 1; i >= 0; i--) {
+
+					validflag = scope.state.my_treedata[i].label != modelValue
+					if (!validflag) {
+						break;
+					}
+				}
+				if (validflag) {
+
+					return true;
+				} else {
+
+					return false;
+				}
+			};
+		}
+	};
+});

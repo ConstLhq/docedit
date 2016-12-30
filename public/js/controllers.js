@@ -1,8 +1,19 @@
-//"ui.bootstrap.contextMenu",
 'use strict';
 angular
 	.module('myApp', ["ng-dragable-div", "angularFileUpload", 'frapontillo.bootstrap-switch', "angularBootstrapNavTree", "pageslide-directive", "ngScrollbars", "toggle-switch", "treeControl", 'ngSanitize', 'ngCsv', 'ui-notification', 'ngMaterial', 'ngMessages'])
-	.service("httpService", ["$http", function(http) {
+	.config(function(NotificationProvider) {
+		NotificationProvider.setOptions({
+			delay: 3000,
+			startTop: 20,
+			startRight: 10,
+			verticalSpacing: 20,
+			horizontalSpacing: 20,
+			positionX: 'center',
+			positionY: 'top'
+		});
+	})
+
+.service("httpService", ["$http", function(http) {
 		var groupObj = {};
 		var watchedgeoinfo = [];
 		var getGroup = function() {
@@ -101,8 +112,8 @@ angular
 				})
 		}
 
-		var downloadFile = function(docid){
-			return http.get('/edit/downloadfile/'+docid)
+		var downloadFile = function(docid) {
+			return http.get('/edit/downloadfile/' + docid)
 				.success(function(file) {
 					return file
 				})
@@ -124,7 +135,7 @@ angular
 			"getPath": getPath,
 			"devidePara": devidePara,
 			"reparse": reparse,
-			"downloadFile":downloadFile
+			"downloadFile": downloadFile
 		}
 	}])
 	.controller('index', ['$scope', function(scope) {}])
@@ -142,7 +153,7 @@ angular
 			replace: false,
 		}
 	})
-	.controller('edit', ["$scope", "FileUploader", "httpService", "$window", "$filter", function(scope, FileUploader, httpService, $window, $filter) {
+	.controller('edit', ["$scope", "FileUploader", "httpService", "$window", "$filter", "Notification", function(scope, FileUploader, httpService, $window, $filter, Notification) {
 		var uploader = scope.uploader = new FileUploader({
 			url: '/fileUpload'
 		});
@@ -150,16 +161,25 @@ angular
 		uploader.filters.push({
 			name: 'filetypeFilter',
 			fn: function(item, option) {
-				console.log(item)
 				var fileType = undefined
-				if (item.name.split('.')[1].indexOf("doc") >= 0) {
-					fileType = "doc"
+				if (item.name.split('.')[1].indexOf("docx") >= 0) {
+					fileType = "docx"
 				} else if (item.name.split('.')[1].indexOf("txt") >= 0) {
 					fileType = "txt"
 				} else if (item.name.split('.')[1].indexOf("pdf") >= 0) {
 					fileType = "pdf"
 				}
-				return fileType && item.size < 10 * 1024 * 1024;
+				var accept = fileType && item.size < 10 * 1024 * 1024;
+				if (!accept) {
+					//notify
+					Notification.primary({
+						message: '<h4>支持文件类型：<ul><li><h4>*.txt</h4></li><li><h4>*.docx</h4></li></h4>',
+						title: '<h4>请重新选择文件</h4>'
+					})
+
+
+				}
+				return accept
 			}
 		});
 		uploader.filters.push({
@@ -194,6 +214,7 @@ angular
 
 		};
 		uploader.onAfterAddingFile = function(fileItem) {
+			console.log("sdfa")
 			console.log(scope.uploader.queue[0])
 			scope.uploader.queue[0].formData.push({
 				docGroup: scope.state.groupOptions[scope.state.groupOptions.length - 1]
@@ -312,9 +333,11 @@ angular
 		scope.leftmenuOptions = function(nod) {
 				console.log(nod)
 				if (nod.hasOwnProperty("children")) {
-					return [['删除文件夹', function($itemScope, $event, modelValue, text, $li) {
+					return [
+						['删除文件夹', function($itemScope, $event, modelValue, text, $li) {
 							scope.state.selectedNode = nod;
-						}]];
+						}]
+					];
 				} //folder
 				else {
 
@@ -325,16 +348,14 @@ angular
 						}],
 						['下载原文件', function($itemScope, $event, modelValue, text, $li) {
 							// httpService.downloadFile(nod.docid).success(function(file){return file})
-							$window.open('/edit/downloadfile/'+nod.docid)
+							$window.open('/edit/downloadfile/' + nod.docid)
 						}],
-						['导出解析json', function($itemScope, $event, modelValue, text, $li) {
+						['导出解析csv', function($itemScope, $event, modelValue, text, $li) {
 							$scope.selected = $itemScope.item.name;
 						}],
-						['清空解析记录', function($itemScope, $event, modelValue, text, $li) {
-							$scope.selected = $itemScope.item.name;
-						}],
-						['重新解析', function($itemScope, $event, modelValue, text, $li) {
-							$scope.selected = $itemScope.item.name;
+						['修改属性', function($itemScope, $event, modelValue, text, $li) {
+							 
+							 $scope.selected = $itemScope.item.name;
 
 						}],
 						['删除文件', function($itemScope, $event, modelValue, text, $li) {
@@ -355,6 +376,11 @@ angular
 				scope.state.showAddGroupInput = false
 
 			}
+		scope.exportEmptyWarning = function() {
+			return !scope.state.results.some(function(item) {
+				return item.selected == true
+			})
+		}
 		scope.showAddGroupInput = function() {
 			scope.state.showAddGroupInput = true
 		}

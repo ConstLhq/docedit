@@ -2,10 +2,13 @@ var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 var ObjectId = Schema.Types.ObjectId
 var DocSchema = new Schema({
+  filePath:String,
   originalName: String,
+  referenceTime:String,
+  sequence: Boolean,
+  type:String,
   rawContent: String,
   htmlContent: String,
-  sequence: Boolean,
   Sentences: [{
     type: String
   }],
@@ -32,7 +35,7 @@ var DocSchema = new Schema({
     updateAt: {
       type: Date,
       default: Date.now()
-    }
+    },
   }
 });
 

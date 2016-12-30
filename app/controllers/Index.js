@@ -23,6 +23,8 @@ exports.edit = function(req, res) {
                         var child = new Object()
                         child.label = obj.originalName
                         child.docid = obj._id
+                        child.type =obj.type
+                        child.time =obj.referenceTime
                         child.grtu=[gr,tu]
                         return child
                     })

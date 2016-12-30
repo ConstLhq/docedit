@@ -1,5 +1,5 @@
 var mongoose = require('mongoose')
-var SALT_WORK_FACTOR = 10
+var crypto=require('crypto')
 var Schema = mongoose.Schema
 var ObjectId = Schema.Types.ObjectId
 var UserSchema = new mongoose.Schema({
@@ -35,6 +35,11 @@ var UserSchema = new mongoose.Schema({
 })
 UserSchema.pre('save', function(next) {
   var user = this
+  //加密密码
+  var cipher = crypto.createCipher('aes192', 'itIsa_54673SaLty');
+  var encrypted = cipher.update(this.password, 'utf8', 'hex');
+  encrypted += cipher.final('hex')
+  this.password=encrypted
   if (this.isNew) {
     this.meta.createAt = this.meta.updateAt = Date.now()
   } else {
@@ -44,7 +49,10 @@ UserSchema.pre('save', function(next) {
 })
 UserSchema.methods = {
   comparePassword: function(_password) {
-    if (_password === this.password) {
+    var cipher = crypto.createCipher('aes192', 'itIsa_54673SaLty');
+    var encrypted = cipher.update(_password, 'utf8', 'hex');
+    encrypted += cipher.final('hex')
+    if (encrypted === this.password) {
       return true
     } else
       return false

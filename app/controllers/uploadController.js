@@ -26,9 +26,9 @@ var options = {
   },
   form: {
     req: "parse",
-    txt: "" ,
-    type:"",
-    time:"",
+    txt: "",
+    type: "",
+    time: "",
   }
 };
 
@@ -44,20 +44,20 @@ var docSaveCb = function(err, newdoc, req, res) {
       console.log(err)
     }
     if (user.docs.indexOf(newdoc._id) == -1) {
-      var gr=tu=0;
+      var gr = tu = 0;
       user.docs.push(newdoc._id)
-      user.group.forEach(function(grp,_gr) {
-        if (grp.groupName == req.body.docGroup){
+      user.group.forEach(function(grp, _gr) {
+        if (grp.groupName == req.body.docGroup) {
           grp.groupFile.push(newdoc._id);
-          tu=grp.groupFile.length-1;
-          gr=_gr;
+          tu = grp.groupFile.length - 1;
+          gr = _gr;
         }
       })
       user.save(function(err, user) {
         if (err) {
           console.log(err)
         } else {
-          res.json([gr,tu])
+          res.json([gr, tu])
         }
       })
     }
@@ -72,97 +72,84 @@ exports.dataInput = function(req, res) {
     var file = req.file
     console.log(file.path)
     options.form.type = req.body.docType
-    options.form.t =new Date(req.body.docDate).toISOString()
-   
+    options.form.t = new Date(req.body.docDate).toISOString()
+
+    //添加全文解析和切分
+    function parseAndCut(filedata) {
+      var events = new Cut_Events();
+      options.form.txt = filedata.replace(/\s/g, '')
+      request(options, function(error, response, body) {
+        if (!error && response.statusCode == 200) {
+          var parsedXML = entities.decodeXML(body)
+
+          console.log(parsedXML)
+          var i = parsedXML.indexOf("<content>");
+          var e = parsedXML.indexOf("</content>");
+
+          parsedXML = parsedXML.substring(i + 9, e)
+
+          var data = events._cutScene(parsedXML.replace(/\n/g, ""))
+
+          var raw = parsedXML.replace(/(<\/?.*?>|\n)/g, '');
+
+          var html = '<p class= "plaintext">' + raw + '</p>'
+            // console.log(data)
+          parser.parseString("<All>" + data + "</All>", function(err, results) {
+            if (err) {
+              console.log(err)
+            }
+
+            var doc = new Mydoc({
+                filePath: path.join(__dirname, "../../", file.path),
+                type:req.body.docType,
+                referenceTime:new Date(req.body.docDate).toISOString(),
+                originalName: file.originalname,
+                owner: req.session.user._id,
+                sequence: req.body.sequence,
+                rawContent: raw,
+                htmlContent: html,
+                Sentences: data.replace(/<\/EVENT>/g, "$&||").split("||"),
+                Events: results.All.EVENT.map(function(event) {
+
+                  return {
+                    CONTENT: event._,
+                    LOC: event._key.locname,
+                    LAT: event._key.lat,
+                    LNG: event._key.lng,
+                    TIME: "timevalue" in event._key ? event._key.timevalue : "NONE"
+                  }
+                }),
+                groupName: req.body.docGroup,
+              })
+              // console.log(JSON.stringify(results.All.EVENT))
+            doc.save(docSaveCb(err, doc, req, res))
+          })
+        }
+      })
+    }
+
     switch (file.originalname.split(".")[1]) {
       case "txt":
         fs.readFile(file.path, {
-            encoding: 'utf-8'
-          }, (err, filedata) => {
-            if (err) {
-              console(err)
-            } else {
-
-              //添加全文解析和切分
-              var events = new Cut_Events();
-
-              options.form.txt = filedata.replace(/\s/g, '')
-              
-
-              request(options, function(error, response, body) {
-                if (!error && response.statusCode == 200) {
-                  var parsedXML = entities.decodeXML(body)
-
-                  console.log(parsedXML)
-                  var i = parsedXML.indexOf("<content>");
-                  var e = parsedXML.indexOf("</content>");
-
-                  parsedXML = parsedXML.substring(i + 9, e)
-
-                  var data = events._cutScene(parsedXML.replace(/\n/g, ""))
-
-                  var raw = parsedXML.replace(/(<\/?.*?>|\n)/g, '');
-
-                  var html = '<p class= "plaintext">' + raw + '</p>'
-                    // console.log(data)
-                  parser.parseString("<All>" + data + "</All>", function(err, results) {
-                    if (err) {
-                      console.log(err)
-                    }
-
-                    var doc = new Mydoc({
-                        originalName: file.originalname,
-                        owner: req.session.user._id,
-                        sequence: req.body.sequence,
-                        rawContent: raw,
-                        htmlContent: html,
-                        Sentences: data.replace(/<\/EVENT>/g, "$&||").split("||"),
-                        Events: results.All.EVENT.map(function(event) {
-
-                          return {
-                            CONTENT: event._,
-                            LOC: event._key.locname,
-                            LAT: event._key.lat,
-                            LNG: event._key.lng,
-                            TIME: "timevalue" in event._key ? event._key.timevalue : "NONE"
-                          }
-                        }),
-                        groupName: req.body.docGroup,
-                      })
-                      // console.log(JSON.stringify(results.All.EVENT))
-                    doc.save(docSaveCb(err, doc, req, res))
-                  })
-                }
-              })
-            }
-          })
-          // break;
-          // case "docx":
-          //   mammoth.convertToHtml({
-          //     path: file.path
-          //   }).then(function(result_html) {
-          //     var html = result_html.value;
-          //     mammoth.extractRawText({
-          //       path: file.path
-          //     }).then(function(result_raw) {
-          //       var raw = result_raw.value
-          //       var doc = new Mydoc({
-          //         originalName: file.originalname,
-          //         owner: req.session.user._id,
-          //         sequence: req.body.sequence,
-          //         rawContent: raw,
-          //         htmlContent: html,
-          //         Sentences: raw.replace(/<\/EVENT>/g, "$&||").split("||"),
-          //         groupName: req.body.docGroup,
-          //       })
-          //       doc.save(docSaveCb(err, doc,req,res))
-          //     })
-          //   });
-          //   break;
+          encoding: 'utf-8'
+        }, (err, filedata) => {
+          if (err) {
+            console(err)
+          } else {
+            parseAndCut(filedata)
+          }
+        })
+        break;
+      case "docx":
+        mammoth.extractRawText({
+          path: file.path
+        }).then(function(result_raw) {
+          parseAndCut(result_raw.value)
+        });
+        break;
     }
   })
 }
-
 
 exports.devide = function(req, res) {
 
@@ -294,7 +281,16 @@ exports.reparse = function(req, res) {
     }
   })
 }
-exports.downloadFile =function(req,res){
+exports.downloadFile = function(req, res) {
   console.log(req.params.docid)
-  res.download(path.join(__dirname, "../../public/uploads/as5864c29f2227ca32f66d15e8/s1event-*-1483026258316.txt"))
+    //
+  Mydoc.findById(req.params.docid, (err, doc) => {
+    if (err) {
+      res.json({
+        error: "download failed"
+      })
+    } else {
+      res.download(doc.filePath, doc.originalName)
+    }
+  })
 }

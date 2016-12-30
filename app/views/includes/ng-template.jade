@@ -140,7 +140,7 @@ script(type="text/ng-template" id="docview.html")
           a.btn.btn-sm.btn-default(href="#" ng-click="filterToggle()")
             span.fa.fa-database
               |保存
-          a.btn.btn-sm.btn-default(href="#" ng-csv="state.results|filter:{'selected':true}" filename="export_data.csv" field-separator="," decimal-separator=".")
+          a.btn.btn-sm.btn-default(href="#" ng-csv="state.results|filter:{'selected':true}" filename="export_data.csv" field-separator="," decimal-separator="." csv-label="true" ng-disabled="exportEmptyWarning()")
             span.fa.fa-save
               |导出
           a.btn.btn-sm.btn-default(href="#" ng-click="selectAll()")

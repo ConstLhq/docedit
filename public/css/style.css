@@ -258,3 +258,10 @@ md-autocomplete md-autocomplete-wrap{
 .md-autocomplete-suggestions{
   height: 32px;
 }
+
+md-checkbox .md-container{
+  top:80%;
+}
+md-checkbox{
+  left:40%;
+}

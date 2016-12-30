@@ -22,6 +22,7 @@ exports.edit = function(req, res) {
                     children: _group.groupFile.map(function(obj,tu) {
                         var child = new Object()
                         child.label = obj.originalName
+                        child.parent = _group.groupName
                         child.docid = obj._id
                         child.type =obj.type
                         child.time =obj.referenceTime

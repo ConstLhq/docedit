@@ -153,7 +153,8 @@ angular
 			replace: false,
 		}
 	})
-	.controller('edit', ["$scope", "FileUploader", "httpService", "$window", "$filter", "Notification", function(scope, FileUploader, httpService, $window, $filter, Notification) {
+
+.controller('edit', ["$scope", "FileUploader", "httpService", "$window", "$filter", "Notification", "$mdDialog", function(scope, FileUploader, httpService, $window, $filter, Notification, $mdDialog) {
 		var uploader = scope.uploader = new FileUploader({
 			url: '/fileUpload'
 		});
@@ -221,6 +222,12 @@ angular
 			})
 		}
 
+		scope.params={
+			type:'sci',
+			group:"默认分组"
+
+		}
+
 		scope.state = {
 
 			"showMapView": false,
@@ -257,10 +264,13 @@ angular
 			},
 			"expanded_nodes": [],
 			"dictionary": {
-				LAT: "经度",
-				LNG: "纬度",
-				TIME: "时间",
-				CONTENT: "事件"
+				LAT:"经度",
+				LNG:"纬度",
+				TIME:"时间",
+				LOC:"地点",
+				CONTENT:"事件",
+				$$hashKey:"编号"
+
 			},
 
 
@@ -330,8 +340,21 @@ angular
 			}
 		}
 
+		scope.cancel = function() {
+			$mdDialog.hide();
+		}
+
+		scope.showUpload = function(ev) {
+			$mdDialog.show({
+				contentElement: '#uploaderDialog',
+				parent: angular.element(document.body),
+				targetEvent: ev,
+				clickOutsideToClose: true,
+				fullscreen: false
+			})
+		};
+
 		scope.leftmenuOptions = function(nod) {
-				console.log(nod)
 				if (nod.hasOwnProperty("children")) {
 					return [
 						['删除文件夹', function($itemScope, $event, modelValue, text, $li) {
@@ -354,8 +377,21 @@ angular
 							$scope.selected = $itemScope.item.name;
 						}],
 						['修改属性', function($itemScope, $event, modelValue, text, $li) {
-							 
-							 $scope.selected = $itemScope.item.name;
+
+							//弹出修改属性的窗口
+							scope.state.selectedNode = nod;
+							scope.params.type=scope.state.selectedNode.type;
+							scope.params.group ="默认分组";
+							scope.params.time =new Date(scope.state.selectedNode.time);
+							(function(ev) {
+								$mdDialog.show({
+									contentElement: '#modifyDialog',
+									parent: angular.element(document.body),
+									targetEvent: ev,
+									clickOutsideToClose: true,
+									fullscreen: false
+								})
+							})($event)
 
 						}],
 						['删除文件', function($itemScope, $event, modelValue, text, $li) {
@@ -399,6 +435,11 @@ angular
 				scope.state.groupOptions = data;
 			});
 
+		}
+		scope.initModifyDialog=function(){
+			scope.params.type=scope.state.selectedNode.type
+			scope.params.referenceTime=new Date(scope.state.selectedNode.referenceTime)
+			// scope.params.group=scope.state.selectedNode.group
 		}
 		scope.initDate = function(form) {
 			form.docDate = new Date()
@@ -694,6 +735,7 @@ angular
 
 						layer.on('click', function() {
 							console.log("you clicked the icon")
+							console.log(record)
 							$("#popupinfo").empty();
 							$("#popupinfo").append($(L.HTMLUtils.buildLocaneTable(record, scope.state.dictionary, '', ["content", "start", "id"])).wrap('<div/>').parent().html());
 							scope.state.showGalley = true

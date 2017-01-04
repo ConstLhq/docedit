@@ -222,9 +222,9 @@ angular
 			})
 		}
 
-		scope.params={
-			type:'sci',
-			group:"默认分组"
+		scope.params = {
+			type: 'sci',
+			group: "默认分组"
 
 		}
 
@@ -264,12 +264,12 @@ angular
 			},
 			"expanded_nodes": [],
 			"dictionary": {
-				LAT:"经度",
-				LNG:"纬度",
-				TIME:"时间",
-				LOC:"地点",
-				CONTENT:"事件",
-				$$hashKey:"编号"
+				LAT: "经度",
+				LNG: "纬度",
+				TIME: "时间",
+				LOC: "地点",
+				CONTENT: "事件",
+				$$hashKey: "编号"
 
 			},
 
@@ -380,9 +380,9 @@ angular
 
 							//弹出修改属性的窗口
 							scope.state.selectedNode = nod;
-							scope.params.type=scope.state.selectedNode.type;
-							scope.params.group ="默认分组";
-							scope.params.time =new Date(scope.state.selectedNode.time);
+							scope.params.type = scope.state.selectedNode.type;
+							scope.params.group = "默认分组";
+							scope.params.time = new Date(scope.state.selectedNode.time);
 							(function(ev) {
 								$mdDialog.show({
 									contentElement: '#modifyDialog',
@@ -436,10 +436,10 @@ angular
 			});
 
 		}
-		scope.initModifyDialog=function(){
-			scope.params.type=scope.state.selectedNode.type
-			scope.params.referenceTime=new Date(scope.state.selectedNode.referenceTime)
-			// scope.params.group=scope.state.selectedNode.group
+		scope.initModifyDialog = function() {
+			scope.params.type = scope.state.selectedNode.type
+			scope.params.referenceTime = new Date(scope.state.selectedNode.referenceTime)
+				// scope.params.group=scope.state.selectedNode.group
 		}
 		scope.initDate = function(form) {
 			form.docDate = new Date()
@@ -635,7 +635,7 @@ angular
 			templateUrl: "filter-result.html",
 		}
 	})
-	.directive("mapView", ["httpService", function(httpService) {
+	.directive("mapView", ["httpService", "Notification", function(httpService, Notification) {
 		return {
 			restrict: "EA",
 			templateUrl: "mapview.html",
@@ -745,84 +745,127 @@ angular
 				});
 
 				map.addLayer(pointLayer);
-				// layerControl.addOverlay(pointLayer, '全部位置');
+				layerControl.addOverlay(pointLayer, '全部位置');
 				/////////////////////////////////
 				///////////////////////////////
 				////////////////////////////
 				//////////////////////////
-				// var getLocation = function(context, locationField, fieldValues, callback) {
-				// 	var location;
-				// 	var latlng = new L.latLng(fieldValues[0][0], fieldValues[0][1])
-				// 	location = {
-				// 		location: latlng,
-				// 		text: "name",
-				// 		center: latlng
-				// 	};
-				// 	return location;
-				// };
-				// var sizeFunction = new L.LinearFunction([1, 16], [253, 48]);
-				// var goptions = {
-				// 	recordsField: null,
-				// 	locationMode: L.LocationModes.CUSTOM,
-				// 	fromField: 'from',
-				// 	toField: 'to',
-				// 	codeField: null,
-				// 	getLocation: getLocation,
-				// 	getEdge: L.Graph.EDGESTYLE.ARC,
-				// 	includeLayer: function(record) {
-				// 		return true;
-				// 	},
-				// 	layerOptions: {
-				// 		fill: false,
-				// 		opacity: 1,
-				// 		weight: 4,
-				// 		fillOpacity: 1.0,
-				// 		distanceToHeight: new L.LinearFunction([0, 0], [100, 50]),
-				// 		markers: {
-				// 			end: true
-				// 		},
-				// 		mode: 'Q'
-				// 	},
-				// 	tooltipOptions: {
-				// 		iconSize: new L.Point(200, 100),
-				// 		iconAnchor: new L.Point(-5, 64),
-				// 		className: 'leaflet-div-icon line-legend'
-				// 	},
-				// 	displayOptions: {
-				// 		cnt: {
-				// 			weight: new L.LinearFunction([0, 3], [10, 20]),
-				// 			color: new L.HSLHueFunction([0, 200], [125, 330], {
-				// 				outputLuminosity: '60%'
-				// 			}),
-				// 			 displayName: '轨迹',
-				// 		},
-				// 		info: {
-				// 			displayName: "说明",
-				// 			displayText: function(x) {
-				// 				return x
-				// 			}
-				// 		}
 
-				// 	}
-				// };
 
-				// scope.$watch(function() {
-				// 	return scope.state.showTrace
-				// }, function(b) {
-				// 	if (b) {
-				// 		httpService.getPath().success(function(path) {
-				// 			var arclayer = new L.Graph(path, goptions)
-				// 			arclayer.addTo(map)
-				// 		})
-				// 	} else {
-				// 		try {
-				// 			arclayer.clearLayers()
-				// 		} catch (err) {
-				// 			console.log(err);
-				// 		}
+				var getLocation = function(context, locationField, fieldValues, callback) {
+					var location;
+					var latlng = new L.latLng(fieldValues[0][0], fieldValues[0][1])
+					location = {
+						location: latlng,
+						text: "name",
+						center: latlng
+					};
+					return location;
+				};
+				var sizeFunction = new L.LinearFunction([1, 16], [253, 48]);
+				var goptions = {
+					recordsField: null,
+					locationMode: L.LocationModes.CUSTOM,
+					fromField: 'from',
+					toField: 'to',
+					codeField: null,
+					getLocation: getLocation,
+					getEdge: L.Graph.EDGESTYLE.ARC,
+					includeLayer: function(record) {
+						return true;
+					},
+					layerOptions: {
+						fill: false,
+						opacity: 1,
+						weight: 4,
+						fillOpacity: 1.0,
+						distanceToHeight: new L.LinearFunction([0, 0], [100, 50]),
+						markers: {
+							end: true
+						},
+						mode: 'Q'
+					},
+					tooltipOptions: {
+						iconSize: new L.Point(200, 100),
+						iconAnchor: new L.Point(-5, 64),
+						className: 'leaflet-div-icon line-legend'
+					},
+					displayOptions: {
+						cnt: {
+							weight: new L.LinearFunction([0, 3], [10, 20]),
+							color: new L.HSLHueFunction([0, 200], [125, 330], {
+								outputLuminosity: '60%'
+							}),
+							displayName: '轨迹',
+						},
+						info: {
+							displayName: "说明",
+							displayText: function(x) {
+								return x
+							}
+						}
 
-				// 	}
-				// })
+					}
+				};
+
+				scope.$watch(function() {
+					return scope.state.showTrace
+				}, function(b) {
+					//满足条件
+					//以下实现显示轨迹逻辑
+					//==>1 筛选选中的事件中时间不能比较的事件
+					//==>2 按照时间先后进行排序
+					//==>3 构造规则数据
+					//==>4 添加至图层进行显示
+					if (b) {
+
+						var arrayForTrace = scope.state.results.filter(function(item) {
+
+								return item.selected && moment(item.TIME).isValid()
+
+							})
+							// 不足以绘制轨迹
+						if (arrayForTrace.length < 2) {
+							Notification.primary("所选事件无法绘制轨迹!")
+							scope.state.showTrace = false
+
+						} else {
+							//按照时间排序
+							arrayForTrace = arrayForTrace.sort(function(a, b) {
+								if (moment(a.TIME).isBefore(b.TIME)) {
+									return -1;
+								}
+								if (moment(a.TIME).isAfter(b.TIME)) {
+									return 1;
+								}
+								// a must be equal to b
+								return 0;
+							})
+
+							//构造数据
+							var path = []
+							for (var i = 0, length = arrayForTrace.length; i < length - 1; i++) {
+								console.log(arrayForTrace[i])
+								var unit = {}
+								unit.from = [parseFloat(arrayForTrace[i].LAT), parseFloat(arrayForTrace[i].LNG)]
+								unit.to = [parseFloat(arrayForTrace[i + 1].LAT), parseFloat(arrayForTrace[i + 1].LNG)]
+								unit.info = arrayForTrace[i].CONTENT
+								path.push(unit)
+							}
+
+							var arclayer = new L.Graph(path, goptions)
+							arclayer.addTo(map)
+
+						}
+					} else {
+						try {
+							arclayer.clearLayers()
+						} catch (err) {
+							console.log(err);
+						}
+
+					}
+				})
 
 
 				////////////////////////////////////
@@ -858,8 +901,8 @@ angular
 				});
 
 				scope.$on("e_tl_selected", function(e, d) {
-					scope.state.ShowAllPoints = false;
-					scope.state.showGalley = true
+					scope.state.ShowAllPoints = false; //关闭显示所有点，仅显示点击的点
+					scope.state.showGalley = true //显示信息窗
 					scope.$apply()
 					pointLayer.clearLayers();
 					pointLayer.addData(d);

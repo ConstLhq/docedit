@@ -7,6 +7,11 @@ var RecordSchema = new Schema({
       ref: 'doc'
     },
     fromSentence: String,
+  /////////add on 2017-01-04////////
+    fromParagraph:Number, //记录所在段落
+    offsetS:Number.//起始偏移位置
+    offsetE:Number.//终止偏移位置
+  ////////////////////////////////////////
     json: Object,
     location: String,
     lat: Number,

@@ -1,18 +1,17 @@
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 var ObjectId = Schema.Types.ObjectId
-var RecordSchema = new Schema({
+var EventSchema = new Schema({
     fromdoc: {
       type: ObjectId,
-      ref: 'doc'
+      ref: 'Doc'
     },
-    fromSentence: String,
+    content: String,
   /////////add on 2017-01-04////////
-    fromParagraph:Number, //记录所在段落
-    offsetS:Number.//起始偏移位置
-    offsetE:Number.//终止偏移位置
+    fromparagraph:Number, //记录所在段落
+    offsetS:Number,//起始偏移位置
+    offsetE:Number,//终止偏移位置
   ////////////////////////////////////////
-    json: Object,
     location: String,
     lat: Number,
     lng: Number,
@@ -33,15 +32,17 @@ var RecordSchema = new Schema({
     }
   })
   // var ObjectId = mongoose.Schema.Types.ObjectId
-RecordSchema.pre('save', function(next) {
+EventSchema.pre('save', function(next) {
   if (this.isNew) {
     this.meta.createAt = this.meta.updateAt = Date.now()
   } else {
     this.meta.updateAt = Date.now()
   }
+
   next()
+  
 })
-RecordSchema.statics = {
+EventSchema.statics = {
   fetch: function(cb) {
     return this
       .find({})
@@ -56,4 +57,4 @@ RecordSchema.statics = {
       .exec(cb)
   }
 }
-module.exports = RecordSchema
+module.exports = EventSchema

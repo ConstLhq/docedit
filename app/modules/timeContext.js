@@ -1,12 +1,8 @@
-const request = require("request"),
-	fs = require("fs"),
-	entities = require("entities"),
-	xml2js = require('xml2js'),
-	sync_request = require('sync-request')
-
-var xmlParser = new xml2js.Parser({
+const xml2js = require('xml2js'),
+	 xmlParser = new xml2js.Parser({
 	attrkey: "_key"
-})
+});
+	 
 function TimeContext(tc) {
 	var that = this
 	if (!tc) {

@@ -130,7 +130,16 @@ script(type="text/ng-template" id="docview.html")
       treecontrol(context-menus="leftmenuOptions(node)" class="tree-classic" tree-model="state.my_treedata" options="state.tree_options" expanded-nodes="state.expanded_nodes" on-selection="my_tree_handler(node)" selected-node="state.selectedNode" ng-init="state.my_treedata="+userTreeData) {{node.label}}{{node.children? "("+node.children.length+")":""}}
     #doc.split.split-horizontal
       #docContent(context-menu="state.middlemenuOptions")
-        h3 尚未选择文档
+        md-list
+          //- md-subheader.md-no-sticky {{sts}}
+          md-list-item(ng-repeat="para in state.paragraphs")
+            .md-list-item-text(layout="column")
+              p {{para.data}}
+            md-checkbox.md-secondary(ng-model="para.selected" ng-change="paraSelChange($index)")
+       //- ul
+       //-   li(ng-repeat="para in state.paragraphs")
+       //-    input(type="checkbox"  class = "form-inline" ng-model="result.selected" style="height:18px position:right:0")
+       //-    p {{para}}
     #result.split.split-horizontal
       .btn-toolbar(role="toolbar")
         .btn-group
@@ -309,16 +318,19 @@ script(type="text/ng-template" id="filter.html")
       .col-sm-10.col-sm-offset-1  
         input.form-control(placeholder='筛选,例:"湖南+污染/湘江/水库-严重' id="" ng-model="state.rootKeyWord"  title="'+'表示且,'-'表示非,'/'表示或")
 script(type="text/ng-template",id = "filter-result.html")
-  ul.list-group
-    li.list-group-item(ng-repeat="result in state.results | filter:extract")
-     input(type="checkbox"  class = "form-inline" ng-model="result.selected" style="height:18px")
-     div(style="margin-top:-32px;margin-left:18px")
-       h4.text-primary 时间：{{result.TIME}}
-       h4.text-primary 地点：{{result.LOC}}
-       h4.text-warning 经纬度：{{result.LNG|number:3}},{{result.LAT|number:3}}
-       div
-         h4.text-success 内容：
-         h4(style = "margin-left:50px;margin-top:-28px") {{result.CONTENT}}
+   md-list(flex="")
+    md-list-item.md-4-line.md-long-text(ng-repeat="result in state.results | filter:extract" ng-click="null")
+      div.md-list-item-text(layout="column")
+        h5.text-primary 时间：{{result.time}}
+        h5.text-primary 地点：{{result.location}}
+        h5.text-warning 坐标：{{result.lng|number:3}},{{result.lat|number:3}}
+        h4 {{result.content}}
+      md-checkbox.md-secondary(ng-model="result.selected")
+      md-divider
+  //- ul.list-group
+  //-   li.list-group-item(ng-repeat="result in state.results | filter:extract")
+  //-    input(type="checkbox"  class = "form-inline" ng-model="result.selected" style="height:18px")
+  //-    div(style="margin-top:-32px;margin-left:18px")
 
 script(type="text/ng-template" id="mapview.html")
   #sidebar.sidebar.collapsed

@@ -42,8 +42,8 @@ angular
 			return http.post('/user/doc', {
 					"docid": docid
 				})
-				.success(function(html) {
-					return html
+				.success(function(paras) {
+					return paras
 				})
 				.error(function(data) {
 					return data
@@ -264,11 +264,11 @@ angular
 			},
 			"expanded_nodes": [],
 			"dictionary": {
-				LAT: "经度",
-				LNG: "纬度",
-				TIME: "时间",
-				LOC: "地点",
-				CONTENT: "事件",
+				lat: "经度",
+				lng: "纬度",
+				time: "时间",
+				loc: "地点",
+				content: "事件",
 				$$hashKey: "编号"
 
 			},
@@ -323,7 +323,8 @@ angular
 						return false //$window.getSelection().toString() != "";
 					}
 				]
-			]
+			],
+
 		}
 
 		scope.my_treedata = []
@@ -332,8 +333,15 @@ angular
 			//记录
 			if (branch.docid) {
 				scope.state.selectedDocId = branch.docid
-				httpService.getDoc(branch.docid).success(function(html) {
-					angular.element('#docContent').html(html.html)
+				httpService.getDoc(branch.docid).success(function(paras) {
+
+					// angular.element('#docContent').html(html.html)
+					scope.state.paragraphs= paras.paragraph.map(function(pas){
+						return {
+							data:pas,
+							selected:false,
+						}
+					})
 					httpService.geoinfo(branch.docid)
 
 				})
@@ -485,6 +493,29 @@ angular
 			scope.my_tree_handler(scope.state.selectedNode)
 
 		}
+
+
+		scope.paraSelChange=function(index){
+					if(scope.state.paragraphs[index].selected){
+						// 将其它段落设置为非选中状态
+						scope.state.paragraphs.forEach(function(pas,index_){
+							if(index!=index_){
+								pas.selected=false
+							}
+						})
+						//段落包含事件选中
+						scope.state.results.forEach(function(re){
+							re.selected=re.fromparagraph==index
+						})
+
+					}else{
+						scope.state.results.forEach(function(re){
+							if(re.fromparagraph==index){
+								re.selected=false
+							}
+						})
+					}
+				}
 		scope.closeTimeLine = function() {
 			scope.state.showTimeLine = false;
 		}
@@ -688,8 +719,8 @@ angular
 				var pointLayer = new L.MarkerDataLayer([], {
 					recordsField: null,
 					locationMode: L.LocationModes.LATLNG,
-					latitudeField: 'LAT',
-					longitudeField: 'LNG',
+					latitudeField: 'lat',
+					longitudeField: 'lng',
 					layerOptions: {
 						fill: false,
 						stroke: false,
@@ -899,6 +930,8 @@ angular
 					}
 
 				});
+
+				
 
 				scope.$on("e_tl_selected", function(e, d) {
 					scope.state.ShowAllPoints = false; //关闭显示所有点，仅显示点击的点

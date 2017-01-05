@@ -183,10 +183,8 @@ exports.doc = function(req, res) {
     if (err) {
       console.log(err)
     } else {
-      console.log(doc._id)
-      console.log(doc)
       res.json({
-        html: doc.htmlContent
+        paragraph: doc.paragraph
       })
     }
   })

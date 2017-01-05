@@ -1,32 +1,27 @@
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 var ObjectId = Schema.Types.ObjectId
+  /**
+    Doc中没有记录所包含的事件信息，通过在Event中记录doc的_id来实现关联, 两套关联反而不利于同步
+  */
 var DocSchema = new Schema({
-  filePath:String,
+  filePath: String,
   originalName: String,
-  referenceTime:String,
+  referenceTime: String,
   sequence: Boolean,
-  type:String,
+  type: String,
   rawContent: String,
-  htmlContent: String,
-  Sentences: [{
+  paragraph: [{
     type: String
   }],
-  Events:[]
-  ,
   matchedSentences: [{
     type: String
   }],
   groupName: String,
-  geoJson: Object,
   owner: {
     type: ObjectId,
     ref: 'User'
   },
-  events: [{
-    type: ObjectId,
-    ref: 'Record'
-  }],
   meta: {
     createAt: {
       type: Date,

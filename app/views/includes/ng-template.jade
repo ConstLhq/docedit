@@ -89,7 +89,7 @@ script(type="text/ng-template" id="editnav.html")
           md-autocomplete(md-selected-item="state.selectedNode" md-search-text="searchText" md-items="item in getMatchesDoc(searchText)" md-item-text="item.label" md-selected-item-change="selectDocChange()" placeholder="搜索文档...")
             md-item-template
               span(md-highlight-text="searchText") {{item.label}}
-            md-not-found 无匹配文档.
+            md-not-found 无匹配文档
             
         -if (user)
          p.navbar-text.navbar-right

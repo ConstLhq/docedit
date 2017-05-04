@@ -1,5 +1,5 @@
 var mongoose = require('mongoose')
-var crypto=require('crypto')
+var crypto= require('crypto')
 var Schema = mongoose.Schema
 var ObjectId = Schema.Types.ObjectId
 var UserSchema = new mongoose.Schema({
@@ -34,13 +34,12 @@ var UserSchema = new mongoose.Schema({
   }
 })
 UserSchema.pre('save', function(next) {
-  var user = this
-  //加密密码
-  var cipher = crypto.createCipher('aes192', 'itIsa_54673SaLty');
-  var encrypted = cipher.update(this.password, 'utf8', 'hex');
-  encrypted += cipher.final('hex')
-  this.password=encrypted
   if (this.isNew) {
+    //加密密码
+    var cipher = crypto.createCipher('aes192', 'itIsa_54673SaLty');
+    var encrypted = cipher.update(this.password, 'utf8', 'hex');
+    encrypted += cipher.final('hex')
+    this.password = encrypted
     this.meta.createAt = this.meta.updateAt = Date.now()
   } else {
     this.meta.updateAt = Date.now()

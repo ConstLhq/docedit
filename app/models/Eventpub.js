@@ -16,7 +16,7 @@ const sequelize = require('./ModelBase')
  geoloc     | geometry(MultiPoint,4326)   | 
 
 */
-var Event = sequelize.define('event', {
+var Eventpub = sequelize.define('eventpub', {
 	id: {
 		type:Sequelize.UUID,
 		defaultValue: Sequelize.UUIDV4,
@@ -30,11 +30,11 @@ var Event = sequelize.define('event', {
 		type: Sequelize.STRING(600),
 	},
 	start_time: {
-		type: Sequelize.STRING(50)
+		type: Sequelize.DATE
 		// defaultValue: Sequelize.NOW
 	},
 	end_time: {
-		type: Sequelize.STRING(50)
+		type: Sequelize.DATE
 		// type: Sequelize.DATE
 		// defaultValue: Sequelize.NOW
 	},
@@ -55,9 +55,9 @@ var Event = sequelize.define('event', {
 }, {
 	timestamps: false,
 	freezeTableName: true,
-	tableName: 'geoevent',
+	tableName: 'geoeventpub',
 	classMethods: {},
 	instanceMethods: {}
 });
 
-module.exports = Event;
+module.exports = Eventpub;

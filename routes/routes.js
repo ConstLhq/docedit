@@ -21,9 +21,11 @@ router.get('/logout', User.logout)
 router.get("/user/mygroup",User.usergroup)
 router.post("/user/newgroup",User.postnewgroup)
 router.post("/user/doc",User.doc)
+router.post("/public/doc",User.publicDoc)
 router.post("/edit/extract",Index.extract)
-router.post("/edit/devide",uploadController.devide)
-router.post("/edit/reparse",uploadController.reparse)
+router.post("/edit/public/extract",Index.publicExtract)
+// router.post("/edit/devide",uploadController.devide)
+// router.post("/edit/reparse",uploadController.reparse)
 router.get("/edit/downloadfile/:docid",uploadController.downloadFile)
 
 module.exports = router;

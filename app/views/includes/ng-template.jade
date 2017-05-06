@@ -321,9 +321,9 @@ script(type="text/ng-template",id = "filter-result.html")
    md-list(flex="")
     md-list-item.md-4-line.md-long-text(ng-repeat="result in state.results | filter:extract" ng-click="null")
       div.md-list-item-text(layout="column")
-        h5.text-primary 时间：{{result.time}}
-        h5.text-primary 地点：{{result.location}}
-        h5.text-warning 坐标：{{result.lng|number:3}},{{result.lat|number:3}}
+        h5.text-primary 时间：{{result.timehint}}||{{result.start_time}}
+        h5.text-primary 地点：{{result.lochint}}
+        h5.text-warning 标签：{{result.tag}}
         h4 {{result.content}}
       md-checkbox.md-secondary(ng-model="result.selected")
       md-divider
@@ -377,9 +377,14 @@ script(type="text/ng-template" id="mapview.html")
           .panel-body
             form.form-horizontal(role="form")
               .form-group
-                label.col-sm-4.control-label 绘制轨迹
+                label.col-sm-4.control-label 切换库
                 .col-sm-8
-                  toggle-switch.switch-success(ng-model="state.showTrace" on-label="显示"
+                  toggle-switch.switch-success(ng-model="state.usePubDB" on-label="公有"
+              off-label="私有")
+              .form-group
+                label.col-sm-4.control-label 多文档
+                .col-sm-8
+                  toggle-switch.switch-success(ng-model="state.MultiDocument" on-label="开启"
               off-label="关闭")
               .form-group
                 label.col-sm-4.control-label 时间轴
@@ -390,11 +395,6 @@ script(type="text/ng-template" id="mapview.html")
                 label.col-sm-4.control-label 信息窗
                 .col-sm-8
                   toggle-switch.switch-success(ng-model="state.showGalley" on-label="开启"
-              off-label="关闭")
-              .form-group
-                label.col-sm-4.control-label 显示全部
-                .col-sm-8
-                  toggle-switch.switch-success(ng-model="state.ShowAllPoints" on-label="开启"
               off-label="关闭")
         .panel.panel-default
           .panel-heading 时间设置

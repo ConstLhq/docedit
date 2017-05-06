@@ -10,7 +10,7 @@ function TimeContext(tc) {
 	}
 	if (typeof tc === "string") {
 		xmlParser.parseString(tc, function(err, result) {
-			that.oringin = result.time._
+			that.origin = result.time._
 			that.value = result.time._key.value
 		})
 	} else {
@@ -18,7 +18,7 @@ function TimeContext(tc) {
 			that.time[n] = tc.time[n];
 		}
 		that.localtime = tc.localtime || null;
-		that.oringin = tc.oringin || null;
+		that.origin = tc.origin || null;
 		that.value = tc.value || null;
 	}
 }
@@ -35,7 +35,7 @@ TimeContext.prototype = {
 	// time[4] - minitue
 	// time[5] - second
 	localtime: null, //	例如：上午, 下午
-	oringin: null,
+	origin: null,
 	value: null,
 }
 Object.defineProperties(TimeContext.prototype, {

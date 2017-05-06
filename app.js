@@ -8,7 +8,7 @@ var bodyParser = require('body-parser');
 
 // var users = require('./routes/users');
 
-var mongoose = require('mongoose')
+// var mongoose = require('mongoose')
 var session = require('express-session')
 var mongoStore = require('connect-mongo')(session)
 var fs = require('fs')
@@ -32,12 +32,12 @@ var walk = function(path) {
 		})
 }
 walk(models_path)
-
+require(path.join(__dirname, '/app/models/initDB'))
 var app = express();
 
 var dbUrl = 'mongodb://localhost:27017/docedit'
 
-mongoose.connect(dbUrl)
+// mongoose.connect(dbUrl)
 
 //load models
 

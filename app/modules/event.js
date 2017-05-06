@@ -207,9 +207,9 @@ Event.prototype = {
 			var eo = nobjs[n];
 			if (eo.tc != null) {
 				if (eo.pc != null)
-					out += '<EVENT timevalue="' + eo.tc.value + '" lng="' + eo.pc.lng + '" lat="' + eo.pc.lat + '" locname="' + eo.pc.origin + '" >' + eo.content.replace(/<\/?.+?>/g, '') + '</EVENT>';
+					out += '<EVENT timevalue="' + eo.tc.value +'" timehint="' + eo.tc.origin + '" lng="' + eo.pc.lng + '" lat="' + eo.pc.lat + '" locname="' + eo.pc.origin + '" >' + eo.content.replace(/<\/?.+?>/g, '') + '</EVENT>';
 				else
-					out += '<EVENT timevalue="' + eo.tc.value + '" >' + eo.content.replace(/<\/?.+?>/g, '') + '</EVENT>';
+					out += '<EVENT timevalue="' + eo.tc.value + '" timehint="' + eo.tc.origin +'" >' + eo.content.replace(/<\/?.+?>/g, '') + '</EVENT>';
 			} else if (eo.pc != null)
 				out += '<EVENT lng="' + eo.pc.lng + '" lat="' + eo.pc.lat + '" locname="' + eo.pc.origin + '" >' + eo.content.replace(/<\/?.+?>/g, '') + '</EVENT>';
 			else

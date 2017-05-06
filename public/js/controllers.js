@@ -1,6 +1,11 @@
 'use strict';
 angular
-	.module('myApp', ["ng-dragable-div", "angularFileUpload", 'frapontillo.bootstrap-switch', "angularBootstrapNavTree", "pageslide-directive", "ngScrollbars", "toggle-switch", "treeControl", 'ngSanitize', 'ngCsv', 'ui-notification', 'ngMaterial', 'ngMessages'])
+	.module('underscore', [])
+	.factory('_', ['$window', function($window) {
+		return $window._; // assumes underscore has already been loaded on the page
+	}]);
+angular
+	.module('myApp', ["ng-dragable-div", "angularFileUpload", 'frapontillo.bootstrap-switch', "angularBootstrapNavTree", "pageslide-directive", "ngScrollbars", "toggle-switch", "treeControl", 'ngSanitize', 'ngCsv', 'ui-notification', 'ngMaterial', 'ngMessages', 'underscore'])
 	.config(function(NotificationProvider) {
 		NotificationProvider.setOptions({
 			delay: 3000,
@@ -63,6 +68,44 @@ angular
 				})
 		}
 
+		var extractPub = function(filter, docid) {
+			return http.post('/edit/public/extract', {
+					"filter": filter,
+					"docid": docid
+				})
+				.success(function(sentence) {
+					return sentence
+				})
+				.error(function(data) {
+					return data
+				})
+		}
+
+		var getDocPub = function(docid) {
+			return http.post('/public/doc', {
+					"docid": docid
+				})
+				.success(function(paras) {
+					return paras
+				})
+				.error(function(data) {
+					return data
+				})
+		}
+
+		var getEventPub = function(docid) {
+			return http.post('/edit/public/extract', {
+					"docid": docid,
+					"filter": [{}],
+				})
+				.success(function(events) {
+					return events
+				})
+				.error(function(data) {
+					return data
+				})
+		}
+
 		var geoinfo = function(docid) {
 			return http.post('/edit/extract', {
 					"filter": [{}],
@@ -74,8 +117,8 @@ angular
 				.error(function(data) {
 					console.log(data)
 				})
-
 		}
+
 		var getPath = function() {
 			return http.get('/edit/path')
 				.success(function(path) {
@@ -122,6 +165,15 @@ angular
 				})
 
 		}
+		var mapnikTile = function(url, options) {
+			return http.post(url, options)
+				.success(function(data) {
+					return data
+				})
+				.error(function(data) {
+					console.log(data)
+				})
+		}
 
 		return {
 			"getGroup": getGroup,
@@ -135,7 +187,10 @@ angular
 			"getPath": getPath,
 			"devidePara": devidePara,
 			"reparse": reparse,
-			"downloadFile": downloadFile
+			"downloadFile": downloadFile,
+			"mapnikTile": mapnikTile,
+			"getDocPub": getDocPub,
+			"extractPub": extractPub
 		}
 	}])
 	.controller('index', ['$scope', function(scope) {}])
@@ -154,7 +209,7 @@ angular
 		}
 	})
 
-.controller('edit', ["$scope", "FileUploader", "httpService", "$window", "$filter", "Notification", "$mdDialog", function(scope, FileUploader, httpService, $window, $filter, Notification, $mdDialog) {
+.controller('edit', ["$scope", "FileUploader", "httpService", "$window", "$filter", "Notification", "$mdDialog","_" ,function(scope, FileUploader, httpService, $window, $filter, Notification, $mdDialog,_) {
 		var uploader = scope.uploader = new FileUploader({
 			url: '/fileUpload'
 		});
@@ -177,8 +232,6 @@ angular
 						message: '<h4>支持文件类型：<ul><li><h4>*.txt</h4></li><li><h4>*.docx</h4></li></h4>',
 						title: '<h4>请重新选择文件</h4>'
 					})
-
-
 				}
 				return accept
 			}
@@ -229,7 +282,6 @@ angular
 		}
 
 		scope.state = {
-
 			"showMapView": false,
 			"isContentCollapsed": false,
 			"uploadChecked": false,
@@ -239,8 +291,8 @@ angular
 			"my_treedata": [],
 			"showTimeLine": false,
 			"showGalley": false,
-			"ShowAllPoints": true,
-			"showTrace": false,
+			"MultiDocument": false,
+			"usePubDB": false,
 			"results": [],
 			"rootKeyWord": "",
 			"selectedDocId": "",
@@ -336,10 +388,10 @@ angular
 				httpService.getDoc(branch.docid).success(function(paras) {
 
 					// angular.element('#docContent').html(html.html)
-					scope.state.paragraphs= paras.paragraph.map(function(pas){
+					scope.state.paragraphs = paras.paragraph.map(function(pas) {
 						return {
-							data:pas,
-							selected:false,
+							data: pas,
+							selected: false,
 						}
 					})
 					httpService.geoinfo(branch.docid)
@@ -415,6 +467,9 @@ angular
 			scope.submitAddnewGroup = function() {
 				httpService.postGroup(scope.state.newGroupName).success(function(data) {
 					scope.state.my_treedata = data;
+					scope.state.groupOptions = data.map(function(folder){
+						return folder.label
+					})
 					scope.state.newGroupName = "";
 				})
 				scope.state.showAddGroupInput = false
@@ -495,27 +550,27 @@ angular
 		}
 
 
-		scope.paraSelChange=function(index){
-					if(scope.state.paragraphs[index].selected){
-						// 将其它段落设置为非选中状态
-						scope.state.paragraphs.forEach(function(pas,index_){
-							if(index!=index_){
-								pas.selected=false
-							}
-						})
-						//段落包含事件选中
-						scope.state.results.forEach(function(re){
-							re.selected=re.fromparagraph==index
-						})
+		scope.paraSelChange = function(index) {
+			if (scope.state.paragraphs[index].selected) {
+				// 将其它段落设置为非选中状态
+				scope.state.paragraphs.forEach(function(pas, index_) {
+						if (index != index_) {
+							pas.selected = false
+						}
+					})
+					//段落包含事件选中
+				scope.state.results.forEach(function(re) {
+					re.selected = re.fromparagraph == index
+				})
 
-					}else{
-						scope.state.results.forEach(function(re){
-							if(re.fromparagraph==index){
-								re.selected=false
-							}
-						})
+			} else {
+				scope.state.results.forEach(function(re) {
+					if (re.fromparagraph == index) {
+						re.selected = false
 					}
-				}
+				})
+			}
+		}
 		scope.closeTimeLine = function() {
 			scope.state.showTimeLine = false;
 		}
@@ -594,11 +649,6 @@ angular
 			}
 		}
 
-
-		// scope.$watch(function(){return scope.state.showTrace},function(){
-		// 	httpService.getPath().success(function(path))
-		// })
-
 	}])
 	.directive("docPanels", function() {
 		return {
@@ -628,7 +678,7 @@ angular
 					scope.state.isContentCollapsed = !scope.state.isContentCollapsed
 				})
 				scope.$on("collapseEdit", function() {
-					if (scope.state.isContentCollapsed) { //
+					if (scope.state.isContentCollapsed) {
 						if (scope.state.isEditCollapsed) {
 							instance.setSizes([16, 42, 42])
 							instance.collapse(0)
@@ -666,7 +716,7 @@ angular
 			templateUrl: "filter-result.html",
 		}
 	})
-	.directive("mapView", ["httpService", "Notification", function(httpService, Notification) {
+	.directive("mapView", ["httpService", "Notification", "_", function(httpService, Notification, _) {
 		return {
 			restrict: "EA",
 			templateUrl: "mapview.html",
@@ -682,7 +732,6 @@ angular
 					resize();
 				});
 				resize();
-
 				var normal_layer = L.tileLayer.chinaProvider('GaoDe.Normal.Map', {
 						maxZoom: 18,
 						minZoom: 5
@@ -697,7 +746,7 @@ angular
 					});
 				var map = L.map('map', {
 					maxZoom: 18,
-					minZoom: 5
+					minZoom: 0
 				}).setView([30.8282, 112.5795], 5);
 				normal_layer.addTo(map)
 
@@ -711,307 +760,248 @@ angular
 					position: 'left'
 				}).addTo(map);
 
-				//显示文档中的点
-				/*
-				 @param ：points:[{content:"string",latlng:"39.222,115.484",time:"1991-12-06"},...]
-				*/
+				var templateMapConfig = function() {
+					this.mapConfig = {
+						version: "1.2.0",
+						layers: [{
+							type: "mapnik",
+							options: {
+								// sql: "select * from geoevent",
+								geom_column: "geoloc",
+								cartocss: "#ne_10m_populated_p_2{ marker-fill: #F11810; marker-opacity: 0.9; marker-allow-overlap: true; marker-placement: point; marker-type: ellipse; marker-width: 7.5; marker-line-width: 2; marker-line-color: #000; marker-line-opacity: 0.2; }",
+								cartocss_version: "2.3.0",
+								srid: 4326,
+								// "interactivity": ["id", "content"]
+							}
+						}]
+					}
+				}
+				templateMapConfig.prototype.customConfig = function(sql, geom_column, interactivity = ["id"]) {
+					var that = this
+					this.mapConfig = _.extend(that.mapConfig, {
+						layers: [_.extend(that.mapConfig.layers[0], {
+							options: _.extend(that.mapConfig.layers[0].options, {
+								sql: sql,
+								geom_column: geom_column,
+								interactivity: interactivity
+							})
+						})]
+					})
+					return this
+				};
 
-				var pointLayer = new L.MarkerDataLayer([], {
-					recordsField: null,
-					locationMode: L.LocationModes.LATLNG,
-					latitudeField: 'lat',
-					longitudeField: 'lng',
-					layerOptions: {
-						fill: false,
-						stroke: false,
-						weight: 0,
-						color: 'rgb(255,85,34)'
-					},
-					filter: function(record) {
-						return true;
-					},
-					setIcon: function(record, options) {
-						var html = '<div><i class="fa fa-map-marker"></i><span class="code"></span></div>';
-						var $html = $(html);
-						var $i = $html.find('i');
-
-						L.StyleConverter.applySVGStyle($i.get(0), options);
-
-						var size = 36
-
-						$i.width(size);
-						$i.height(size);
-						$i.css('font-size', size + 'px');
-						$i.css('line-height', size + 'px');
-
-						var $code = $html.find('.code');
-
-						$code.width(size);
-						$code.height(size);
-						$code.css('line-height', size + 'px');
-						$code.css('font-size', size / 3 + 'px');
-						$code.css('margin-top', -size / 2 + 'px');
-
-						var icon = new L.DivIcon({
-							iconSize: new L.Point(size, size),
-							iconAnchor: new L.Point(size / 2, size / 2),
-							className: 'airport-icon',
-							html: $html.wrap('<div/>').parent().html()
-						});
-
-						return icon;
-					},
-
-					onEachRecord: function(layer, record) {
-
-						layer.on('click', function() {
-							console.log("you clicked the icon")
-							console.log(record)
-							$("#popupinfo").empty();
-							$("#popupinfo").append($(L.HTMLUtils.buildLocaneTable(record, scope.state.dictionary, '', ["content", "start", "id"])).wrap('<div/>').parent().html());
-							scope.state.showGalley = true
-							scope.$apply()
+				var TileFactory = function() {
+					this.MultiAndPubDocumentTile = function() {
+						//多文档，公共库
+						var baseUrl = "http://localhost:4000/database/geodata/layergroup",
+							sql = "select * from village",
+							geom_column = "geom",
+							interactivity = ["gid"],
+							mapConfig = new templateMapConfig().customConfig(sql, geom_column, interactivity);
+						httpService.mapnikTile(baseUrl, mapConfig.mapConfig).success(function(data) {
+							console.info("Success: " + JSON.stringify(data));
+							setMap(baseUrl + "/" + data.layergroupid, data.metadata);
 						});
 					}
-				});
+					this.SingleAndPubDocumentTile = function() {
+						//单文档，公共库
+						var baseUrl = "http://localhost:4000/database/geodata/layergroup",
+							interactivity = ["gid"],
+							geom_column = "geom",
+							sql = "select * from village",
+							mapConfig = new templateMapConfig().customConfig(sql, geom_column, interactivity);
+						httpService.mapnikTile(baseUrl, mapConfig.mapConfig).success(function(data) {
+							console.info("Success: " + JSON.stringify(data));
+							setMap(baseUrl + "/" + data.layergroupid, data.metadata);
+						});
+					}
+					this.MultiAndPrivateDocumentTile = function() {
+						//多文档，私有库
+						var baseUrl = "http://localhost:4000/database/testdb/layergroup",
+							interactivity = ["id"],
+							geom_column = "geoloc",
+							sql = "select * from geoevent",
+							mapConfig = new templateMapConfig().customConfig(sql, geom_column, interactivity);
+						httpService.mapnikTile(baseUrl, mapConfig.mapConfig).success(function(data) {
+							console.info("Success: " + JSON.stringify(data));
+							setMap(baseUrl + "/" + data.layergroupid, data.metadata);
+						});
 
-				map.addLayer(pointLayer);
-				layerControl.addOverlay(pointLayer, '全部位置');
-				/////////////////////////////////
-				///////////////////////////////
-				////////////////////////////
-				//////////////////////////
-
-
-				var getLocation = function(context, locationField, fieldValues, callback) {
-					var location;
-					var latlng = new L.latLng(fieldValues[0][0], fieldValues[0][1])
-					location = {
-						location: latlng,
-						text: "name",
-						center: latlng
-					};
-					return location;
-				};
-				var sizeFunction = new L.LinearFunction([1, 16], [253, 48]);
-				var goptions = {
-					recordsField: null,
-					locationMode: L.LocationModes.CUSTOM,
-					fromField: 'from',
-					toField: 'to',
-					codeField: null,
-					getLocation: getLocation,
-					getEdge: L.Graph.EDGESTYLE.ARC,
-					includeLayer: function(record) {
-						return true;
-					},
-					layerOptions: {
-						fill: false,
-						opacity: 1,
-						weight: 4,
-						fillOpacity: 1.0,
-						distanceToHeight: new L.LinearFunction([0, 0], [100, 50]),
-						markers: {
-							end: true
-						},
-						mode: 'Q'
-					},
-					tooltipOptions: {
-						iconSize: new L.Point(200, 100),
-						iconAnchor: new L.Point(-5, 64),
-						className: 'leaflet-div-icon line-legend'
-					},
-					displayOptions: {
-						cnt: {
-							weight: new L.LinearFunction([0, 3], [10, 20]),
-							color: new L.HSLHueFunction([0, 200], [125, 330], {
-								outputLuminosity: '60%'
-							}),
-							displayName: '轨迹',
-						},
-						info: {
-							displayName: "说明",
-							displayText: function(x) {
-								return x
+					}
+					this.SingleAndPrivateDocumentTile = function() {
+						//单文档，私有库
+						var baseUrl = "http://localhost:4000/database/testdb/layergroup",
+							interactivity = ["id"],
+							geom_column = "geoloc",
+							sql = "select * from geoevent where \"docownId\" =" + "\'" + scope.state.selectedDocId + "\'",
+							mapConfig = new templateMapConfig().customConfig(sql, geom_column, interactivity);
+						httpService.mapnikTile(baseUrl, mapConfig.mapConfig).success(function(data) {
+							console.info("Success: " + JSON.stringify(data));
+							setMap(baseUrl + "/" + data.layergroupid, data.metadata);
+						});
+					}
+				}
+				var TileFactoryObj = new TileFactory();
+				var layers = [];
+				var setMap = function(Urltoken, metadata) {
+					metadata = metadata || {};
+					var metadataLayers = metadata.layers || [];
+					layers.forEach(function(layer) {
+						map.removeLayer(layer)
+						layerControl.removeLayer(layer)
+					});
+					layers = [];
+					var tileLayer = new L.tileLayer(Urltoken + '/{z}/{x}/{y}.png');
+					metadataLayers.forEach(function(layer, layerIndex) {
+						var utfGridLayer = new L.UtfGrid(Urltoken + '/' + layerIndex + '/{z}/{x}/{y}.grid.json?callback={cb}');
+						utfGridLayer.on('click', function(e) {
+							if (e.data) {
+								console.log('click', e.data);
+							} else {
+								console.log('click nothing');
 							}
-						}
-
-					}
-				};
-
-				scope.$watch(function() {
-					return scope.state.showTrace
-				}, function(b) {
-					//满足条件
-					//以下实现显示轨迹逻辑
-					//==>1 筛选选中的事件中时间不能比较的事件
-					//==>2 按照时间先后进行排序
-					//==>3 构造规则数据
-					//==>4 添加至图层进行显示
-					if (b) {
-
-						var arrayForTrace = scope.state.results.filter(function(item) {
-
-								return item.selected && moment(item.TIME).isValid()
-
-							})
-							// 不足以绘制轨迹
-						if (arrayForTrace.length < 2) {
-							Notification.primary("所选事件无法绘制轨迹!")
-							scope.state.showTrace = false
-
-						} else {
-							//按照时间排序
-							arrayForTrace = arrayForTrace.sort(function(a, b) {
-								if (moment(a.TIME).isBefore(b.TIME)) {
-									return -1;
-								}
-								if (moment(a.TIME).isAfter(b.TIME)) {
-									return 1;
-								}
-								// a must be equal to b
-								return 0;
-							})
-
-							//构造数据
-							var path = []
-							for (var i = 0, length = arrayForTrace.length; i < length - 1; i++) {
-								console.log(arrayForTrace[i])
-								var unit = {}
-								unit.from = [parseFloat(arrayForTrace[i].LAT), parseFloat(arrayForTrace[i].LNG)]
-								unit.to = [parseFloat(arrayForTrace[i + 1].LAT), parseFloat(arrayForTrace[i + 1].LNG)]
-								unit.info = arrayForTrace[i].CONTENT
-								path.push(unit)
-							}
-
-							var arclayer = new L.Graph(path, goptions)
-							arclayer.addTo(map)
-
-						}
-					} else {
-						try {
-							arclayer.clearLayers()
-						} catch (err) {
-							console.log(err);
-						}
-
-					}
-				})
-
-
-				////////////////////////////////////
-				///////////////////////////////////
-				/////////////////////////////////////
-				/////////////////////////////////////
-
-				scope.$watch(httpService.getGeoInfo, function(points) {
-
-					scope.state.allPoints = points
-
-					if (scope.state.ShowAllPoints) {
-						pointLayer.clearLayers();
-						pointLayer.addData(points);
-					}
-				});
-
-				scope.$watch(function() {
-					return scope.state.ShowAllPoints
-				}, function(showallpts) {
-
-
-					if (scope.state.ShowAllPoints) {
-
-						pointLayer.clearLayers();
-						pointLayer.addData(scope.state.allPoints);
-
-					} else {
-
-						pointLayer.clearLayers()
-					}
-
-				});
-
-				
-
-				scope.$on("e_tl_selected", function(e, d) {
-					scope.state.ShowAllPoints = false; //关闭显示所有点，仅显示点击的点
-					scope.state.showGalley = true //显示信息窗
-					scope.$apply()
-					pointLayer.clearLayers();
-					pointLayer.addData(d);
-					$("#popupinfo").empty();
-					$("#popupinfo").append($(L.HTMLUtils.buildLocaneTable(d[0], scope.state.dictionary, '', ["content", "start", "id"])).wrap('<div/>').parent().html());
-					map.setView([d[0].LAT, d[0].LNG], 6);
-
-				})
-
-			}
-		}
-	}])
-	.directive('timeLine', ['httpService', function(httpService) {
-		return {
-			restrict: 'EA',
-			replace: true,
-			template: '<div></div>',
-			link: function(scope, element, attrs) {
-				var container = document.getElementById('timeline');
-				var items = new vis.DataSet();
-				var options = {
-					// Set global item type. Type can also be specified for items individually
-					// Available types: 'box' (default), 'point', 'range', 'rangeoverflow'
-					type: 'point',
-					showMajorLabels: false,
-					height: 256,
-				};
-
-				var timeline = new vis.Timeline(container, items, options)
-				var onSelect = function(properties) {
-					var selected = timeline.getSelection();
-					if (selected.length > 0) {
-						var item = selected[0]
-						scope.$emit("e_tl_selected", [items.get(item)])
-					}
-				};
-
-				// Add a listener to the select event
-				timeline.on('select', onSelect);
-
-				var drawTimeLine = function(data) {
-					items.clear();
-					items.add(data)
-					timeline.fit();
+						});
+						var EventLayer = L.layerGroup([tileLayer, utfGridLayer])
+						EventLayer.addTo(map)
+						layerControl.addOverlay(EventLayer, '事件');
+						layers.push(EventLayer);
+					});
 				}
 
-				scope.$watch(httpService.getGeoInfo, function(points) {
+				scope.$watch(function() {
+					return +scope.state.MultiDocument + 2 * scope.state.usePubDB
+				}, function(statu) {
+					switch (statu) {
+						case 0: //S&Prv
+							if (scope.state.selectedDocId)
+								TileFactoryObj.SingleAndPrivateDocumentTile();
+							break;
+						case 1: //M&Prv
+							TileFactoryObj.MultiAndPrivateDocumentTile();
+							break;
+						case 2: //S&Pub
+							TileFactoryObj.SingleAndPubDocumentTile();
+							break;
+						case 3: //M*Pub
+							TileFactoryObj.MultiAndPubDocumentTile();
+							break;
 
-					if (points instanceof Array) {
+							scope.$on("e_tl_selected", function(e, d) {
+								scope.state.ShowAllPoints = false; //关闭显示所有点，仅显示点击的点
+								scope.state.showGalley = true //显示信息窗
+									// scope.$apply()
+									// pointLayer.clearLayers();
+									// pointLayer.addData(d);
+									// $("#popupinfo").empty();
+									// $("#popupinfo").append($(L.HTMLUtils.buildLocaneTable(d[0], scope.state.dictionary, '', ["content", "start", "id"])).wrap('<div/>').parent().html());
+									// map.setView([d[0].LAT, d[0].LNG], 6);
 
-						moment.locale("zh-cn")
-
-						var validTime = points.filter(function(p) {
-							return moment(p.TIME).isValid()
-						})
-
-
-						var standard = validTime.map(function(p) {
-							return {
-								start: moment(p.TIME).format(),
-								content: p.TIME,
-								LNG: p.LNG,
-								LAT: p.LAT,
-								CONTENT: p.CONTENT,
-								TIME: p.TIME,
-							}
-						})
-						drawTimeLine(standard);
-
+							})
 					}
 				})
 
-			}
+					scope.$watch(function() {
+					return scope.state.selectedDocId
+				}, function(docid) {
+					if (scope.state.usePubDB) {
+						//切换到公共库的这篇文档
+						httpService.getDocPub(docid).success(function(data) {
 
+							scope.state.paragraphs = paras.paragraph.map(function(pas) {
+								return {
+									data: pas,
+									selected: false,
+								}
+							})
+
+							httpService.getEventPub(docid).success(function(events) {
+								scope.state.results = events;
+								scope.$apply()
+							})
+						})
+
+					} else {
+						//切换到私有库的这篇文档
+						httpService.getDoc(docid).success(function(paras) {
+							scope.state.paragraphs = paras.paragraph.map(function(pas) {
+								return {
+									data: pas,
+									selected: false,
+								}
+							})
+							httpService.geoinfo(docid)
+						})
+
+					}
+				})
+			}
 		}
 	}])
+
+.directive('timeLine', ['httpService', function(httpService) {
+	return {
+		restrict: 'EA',
+		replace: true,
+		template: '<div></div>',
+		link: function(scope, element, attrs) {
+			var container = document.getElementById('timeline');
+			var items = new vis.DataSet();
+			var options = {
+				// Set global item type. Type can also be specified for items individually
+				// Available types: 'box' (default), 'point', 'range', 'rangeoverflow'
+				type: 'point',
+				showMajorLabels: false,
+				height: 256,
+			};
+
+			var timeline = new vis.Timeline(container, items, options)
+			var onSelect = function(properties) {
+				var selected = timeline.getSelection();
+				if (selected.length > 0) {
+					var item = selected[0]
+					scope.$emit("e_tl_selected", [items.get(item)])
+				}
+			};
+
+			// Add a listener to the select event
+			timeline.on('select', onSelect);
+
+			var drawTimeLine = function(data) {
+				items.clear();
+				items.add(data)
+				timeline.fit();
+			}
+
+			scope.$watch(httpService.getGeoInfo, function(points) {
+
+				if (points instanceof Array) {
+
+					moment.locale("zh-cn")
+
+					var validTime = points.filter(function(p) {
+						return moment(p.TIME).isValid()
+					})
+
+
+					var standard = validTime.map(function(p) {
+						return {
+							start: moment(p.TIME).format(),
+							content: p.TIME,
+							LNG: p.LNG,
+							LAT: p.LAT,
+							CONTENT: p.CONTENT,
+							TIME: p.TIME,
+						}
+					})
+					drawTimeLine(standard);
+
+				}
+			})
+
+		}
+
+	}
+}])
 
 .directive('grpnamevalid', function() {
 	return {

@@ -18,7 +18,7 @@ const sequelize = require('./ModelBase')
 */
 var Event = sequelize.define('event', {
 	id: {
-		type:Sequelize.UUID,
+		type:Sequelize.STRING(50),
 		defaultValue: Sequelize.UUIDV4,
 		primaryKey: true
 	},

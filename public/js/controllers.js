@@ -154,6 +154,17 @@ angular
 					console.log(data)
 				})
 		}
+		var getEventInfo = function(eventid) {
+			return http.post('/edit/eventinfo', {
+					"eventid": eventid
+				})
+				.success(function(eventdetail) {
+					return eventdetail
+				})
+				.error(function(data) {
+					console.log(data)
+				})
+		}
 
 		var downloadFile = function(docid) {
 			return http.get('/edit/downloadfile/' + docid)
@@ -190,7 +201,8 @@ angular
 			"downloadFile": downloadFile,
 			"mapnikTile": mapnikTile,
 			"getDocPub": getDocPub,
-			"extractPub": extractPub
+			"extractPub": extractPub,
+			"getEventInfo": getEventInfo
 		}
 	}])
 	.controller('index', ['$scope', function(scope) {}])
@@ -209,7 +221,7 @@ angular
 		}
 	})
 
-.controller('edit', ["$scope", "FileUploader", "httpService", "$window", "$filter", "Notification", "$mdDialog","_" ,function(scope, FileUploader, httpService, $window, $filter, Notification, $mdDialog,_) {
+.controller('edit', ["$scope", "FileUploader", "httpService", "$window", "$filter", "Notification", "$mdDialog", "_", function(scope, FileUploader, httpService, $window, $filter, Notification, $mdDialog, _) {
 		var uploader = scope.uploader = new FileUploader({
 			url: '/fileUpload'
 		});
@@ -467,7 +479,7 @@ angular
 			scope.submitAddnewGroup = function() {
 				httpService.postGroup(scope.state.newGroupName).success(function(data) {
 					scope.state.my_treedata = data;
-					scope.state.groupOptions = data.map(function(folder){
+					scope.state.groupOptions = data.map(function(folder) {
 						return folder.label
 					})
 					scope.state.newGroupName = "";
@@ -574,8 +586,11 @@ angular
 		scope.closeTimeLine = function() {
 			scope.state.showTimeLine = false;
 		}
-		scope.test = function() {
-			console.log(scope.node)
+		// 从弹窗中工具选择 切换文档
+		scope.switchDoc = function(docid) {
+			// 获取文档
+			// console.log(docid)
+			scope.state.selectedDocId = docid;
 		}
 
 		scope.$watch(httpService.getGeoInfo, function(points) {
@@ -716,7 +731,7 @@ angular
 			templateUrl: "filter-result.html",
 		}
 	})
-	.directive("mapView", ["httpService", "Notification", "_", function(httpService, Notification, _) {
+	.directive("mapView", ["httpService", "Notification", "_", '$compile', function(httpService, Notification, _, $compile) {
 		return {
 			restrict: "EA",
 			templateUrl: "mapview.html",
@@ -746,7 +761,7 @@ angular
 					});
 				var map = L.map('map', {
 					maxZoom: 18,
-					minZoom: 0
+					minZoom: 5
 				}).setView([30.8282, 112.5795], 5);
 				normal_layer.addTo(map)
 
@@ -776,7 +791,7 @@ angular
 						}]
 					}
 				}
-				templateMapConfig.prototype.customConfig = function(sql, geom_column, interactivity = ["id"]) {
+				templateMapConfig.prototype.customConfig = function(sql, geom_column, interactivity) {
 					var that = this
 					this.mapConfig = _.extend(that.mapConfig, {
 						layers: [_.extend(that.mapConfig.layers[0], {
@@ -818,12 +833,12 @@ angular
 					this.MultiAndPrivateDocumentTile = function() {
 						//多文档，私有库
 						var baseUrl = "http://localhost:4000/database/testdb/layergroup",
-							interactivity = ["id"],
+							interactivity = ['id'],
 							geom_column = "geoloc",
 							sql = "select * from geoevent",
 							mapConfig = new templateMapConfig().customConfig(sql, geom_column, interactivity);
 						httpService.mapnikTile(baseUrl, mapConfig.mapConfig).success(function(data) {
-							console.info("Success: " + JSON.stringify(data));
+							console.info(mapConfig.mapConfig);
 							setMap(baseUrl + "/" + data.layergroupid, data.metadata);
 						});
 
@@ -857,6 +872,20 @@ angular
 						utfGridLayer.on('click', function(e) {
 							if (e.data) {
 								console.log('click', e.data);
+								//请求content，
+
+								httpService.getEventInfo(e.data.id).success(function(data) {
+										var popup = L.popup()
+											.setLatLng(e.latlng)				
+											.setContent('<p class="text-success">时间:' + data.time + '</p>'+
+														'<p class="text-primary">地点:' + data.lochint + '</p>'+
+														'<p class="text-warnning">内容:' + data.content + '</p>'+
+														'<a href=# ng-click=switchDoc("'+data.docid+'")>查看详情</a>')
+											.openOn(map);
+										var content = $compile(angular.element('.leaflet-pane.leaflet-popup-pane'))(scope);
+
+									})
+								
 							} else {
 								console.log('click nothing');
 							}
@@ -900,7 +929,7 @@ angular
 					}
 				})
 
-					scope.$watch(function() {
+				scope.$watch(function() {
 					return scope.state.selectedDocId
 				}, function(docid) {
 					if (scope.state.usePubDB) {
@@ -920,6 +949,7 @@ angular
 							})
 						})
 
+
 					} else {
 						//切换到私有库的这篇文档
 						httpService.getDoc(docid).success(function(paras) {
@@ -931,6 +961,7 @@ angular
 							})
 							httpService.geoinfo(docid)
 						})
+						TileFactoryObj.SingleAndPrivateDocumentTile();
 
 					}
 				})

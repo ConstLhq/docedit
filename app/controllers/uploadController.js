@@ -48,11 +48,12 @@ exports.dataInput = function(req, res) {
     function parseAndCut(filedata) {
       console.log("in parse")
         //拆分解析
-      var paragraphs = filedata.split(/\n/)
+        //FIX ME 暂时去掉段落信息
+      var paragraphs = filedata.replace(/\s/g,"").split(/\n/)
       // console.log(paragraphs);
       // console.log(paragraphs.filter);
       paragraphs = paragraphs.filter(function(s) {
-        return s != ""
+        return s!= ""
       })
       var doc = {
             filePath: path.join(__dirname, "../../", file.path),

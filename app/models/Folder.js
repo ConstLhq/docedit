@@ -6,7 +6,7 @@ const Docown = require('./Docown')
 
 var Folder = sequelize.define('folder', {
 	id: {
-		type: Sequelize.UUID,
+		type: Sequelize.STRING(50),
 		unique: true,
 		defaultValue: Sequelize.UUIDV4,
 		primaryKey: true

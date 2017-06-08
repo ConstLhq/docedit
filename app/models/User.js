@@ -6,7 +6,7 @@ const Event = require('./Event')
 crypto = require('crypto');
 var User = sequelize.define('user', {
 	id:{
-		type:Sequelize.UUID,
+		type:Sequelize.STRING(50),
 		unique:true,
 		defaultValue: Sequelize.UUIDV4,
 		primaryKey: true

@@ -55,7 +55,7 @@ exports.extract = function(req, res) {
     (async()=>{
         var events = await Event.findAll({
             where :{
-                docId:req.body.docid
+                docownId:req.body.docid
             }
         })
 
@@ -134,3 +134,10 @@ exports.publicExtract = function(req, res) {
     })()
 }
 
+exports.eventInfo = function(req,res){
+    //只需要返回 事件内容和 文档 id
+    (async()=>{
+        var event = await Event.findById(req.body.eventid)
+    res.json({"time":event.timehint ,"lochint":event.lochint,"content":event.content,docid:event.docownId})
+})()
+}

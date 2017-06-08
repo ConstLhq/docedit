@@ -3,8 +3,7 @@ const Folder = require('../models/Folder')
 const Docown = require('../models/Docown')
 const Docpub = require('../models/Docpub')
 const _ = require("underscore")
-
-// signup
+  // signup
 exports.showSignup = function(req, res) {
   res.render('signup', {
     title: '注册页面'
@@ -30,18 +29,15 @@ exports.signup = function(req, res) {
             folderName: "默认分组"
           }]
         })
-
         user = User.create(_user, {
           include: [{
             model: Folder,
             as: 'folders'
           }]
         }).then(function(user) {
-
           console.log("###########")
           console.log(user.addFolder)
           console.log(user.addDoc)
-
           req.session.user = user //注册后自动登陆
           res.redirect('/')
         }).catch(function(err) {
@@ -92,7 +88,6 @@ exports.logout = function(req, res) {
   //       })
   //     })
   //   }
-
 exports.signinRequired = function(req, res, next) {
   var user = req.session.user
   if (!user) {
@@ -124,7 +119,6 @@ exports.del = function(req, res) {
     })
   }
 }
-
 exports.usergroup = function(req, res) {
   User.findById(req.session.user.id, {
     include: [{
@@ -141,36 +135,35 @@ exports.usergroup = function(req, res) {
     console.log('failed usergroup query: ' + err);
   });
 }
-
 exports.postnewgroup = function(req, res) {
-  User.findById(req.session.user.id, {
-    include: [{
-      model: Folder,
-      as: "folders",
+  (async() => {
+    var user = await User.findById(req.session.user.id, {
       include: [{
-        model: Docown,
-        as: "docs"
+        model: Folder,
+        as: "folders",
+        include: [{
+          model: Docown,
+          as: "docs"
+        }]
       }]
-    }]
-  }).then(function(user) {
-    if (req.body.name != "") {
-      // user.folders.forEach(function(grp) {
-      //     if (grp.folderName == req.body.name) {
-      //       return
-      //     }
-      //   })
-      (async() => {
-        //create a new folder
-        var newfolder = await Folder.create({
-          folderName: req.body.name
-        })
-        user.addFolder(newfolder)
-
-      })()
-    }
-
-
+    })
+    user.folders.forEach(function(grp) {
+      if (grp.folderName == req.body.name) {
+        return
+      }
+    })
     var treedata = new Array();
+    if (req.body.name != "") {
+      treedata.push({
+        label: req.body.name,
+        children: []
+      })
+      //create a new folder
+      var newfolder = await Folder.create({
+        folderName: req.body.name
+      })
+      user.addFolder(newfolder)
+    }
     user.folders.forEach(function(_group, gr) {
       treedata.push({
         label: _group.folderName,
@@ -186,11 +179,9 @@ exports.postnewgroup = function(req, res) {
         })
       })
     });
-    treedata.push({label:req.body.name,children:[]})
     res.json(treedata)
-  })
+  })()
 }
-
 exports.doc = function(req, res) {
   Docown.findById(req.body.docid).then(function(doc) {
     if (doc) {
@@ -200,7 +191,6 @@ exports.doc = function(req, res) {
     }
   })
 }
-
 exports.publicDoc = function(req, res) {
   Docpub.findById(req.body.docid).then(function(doc) {
     if (doc) {

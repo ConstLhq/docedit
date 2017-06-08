@@ -53,7 +53,7 @@ input,.form-control{border-radius:3px!important;border-color:#d9d9d9;}
 #headerContainer.float-container .navbar-nav>li>a{color:#222}
 #headerContainer.float-container .navbar-nav>li>a:hover{color:#000;border-bottom-color:#000}
 #headerContainer.float-container .navbar-nav>li>a:hover,#headerContainer.float-container .navbar-nav>.active>a{border-bottom-color:#000}
-.header-section{background:url(/img/bg.jpg) no-repeat center top #1a1a1a;background-size:100% auto;color:#fff;padding-top:50px;height:100vh}
+.header-section{background:url(/img/bg.jpgg) no-repeat center top #1a1a1a;background-size:100% auto;color:#fff;padding-top:50px;height:100vh}
 .header-section .header{text-align:center;padding:80px 30px 30px}
 .header-section .header h2,.header-section .header p{text-align:center;font-size:36px}
 .header-section .header p{font-size:20px}

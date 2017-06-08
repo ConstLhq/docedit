@@ -3,7 +3,70 @@ html#ng-app(ng-app='myApp')
   head
     include ../includes/head
   body
-    include ../includes/ng-template
+    script(type="text/ng-template" id="indexnav.html")
+      nav#headerContainer.navbar.navbar-default.navbar-fixed-top(role='navigation')
+            .container.container-fluid
+              .navbar-header
+                button.navbar-toggle.collapsed(type='button', data-toggle='collapse', data-target='#navbar', aria-expanded='false', aria-controls='navbar')
+                  span.sr-only Toggle navigation
+                  span.icon-bar
+                  span.icon-bar
+                  span.icon-bar
+                a.navbar-brand(href='/', title='首页')       
+                  img(src='/img/logo.png')
+              #navbarUser
+                -if (user)
+                  .dropdown(role='presentation')
+                    a.dropdown-toggle(data-toggle='dropdown', href='#')
+                      span.my-username 欢迎您,#{user.name}
+                      span.fa.fa-caret-down
+                    ul.dropdown-menu(role='menu')
+                      li
+                        a(href='/user/#{user._id}') 个人中心
+                      li
+                        a(href='/logout') 退出
+              #navbar.navbar-collapse.collapse
+                ul.nav.navbar-nav.navbar-right
+                  li.active
+                    a(href='/') 首页
+                  li
+                    a(href='#') 信息提取
+                  li
+                    a#leanoteApp(href='#') 地图视图
+                  li
+                    a(href='#') 关于
+        #signupModal.modal.fade
+          .modal-dialog
+            .modal-content
+              form(method="POST", action="/user/signup")
+                .modal-header(style="color:rgb(57,57,57)") 注册
+                .modal-body
+                  .form-group
+                    label(for="signupName",style="color:rgb(57,57,57)") 用户名
+                    input#signupName.form-control(name="name", type="text" ,placeholder="数字字母下划线组合",pattern="[a-zA-Z0-9_\.]+",required,maxlength="15")
+                  .form-group
+                    label(for="signupPassword",style="color:rgb(57,57,57)") 密码
+                    input#signupPassword.form-control(name="password", type="password",maxlength="15")
+                .modal-footer
+                  button.btn.btn-default(type="button", data-dismiss="modal") 关闭
+                  button.btn.btn-success(type="submit") 注册
+        #signinModal.modal.fade
+          .modal-dialog
+            .modal-content
+              form.form-horizontal(method="POST", action="/user/signin")
+                .modal-header(style="color:rgb(57,57,57)") 登录
+                .modal-body
+                  .form-group
+                    label.col-sm-2.control-label(for="signinName",style="color:rgb(57,57,57)") 邮箱：
+                    .col-sm-10
+                      input#signinName.form-control(name="name", type="text",placeholder="请输入用户名",pattern="[a-zA-Z0-9_\.]+",required,maxlength="15")
+                  .form-group
+                    label.col-sm-2.control-label(for="signinPassword",style="color:rgb(57,57,57)") 密码：
+                    .col-sm-10
+                      input#signinPassword.form-control(name="password", type="password")
+                .modal-footer
+                  button.btn.btn-default(type="button", data-dismiss="modal") 关闭
+                  button.btn.btn-success(type="submit") 登录
     div(ng-controller="index")
       div(index-nav)
       .header-section
